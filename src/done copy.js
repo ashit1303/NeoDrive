@@ -4,33 +4,6 @@ const bluebird = require('bluebird');
 const moment = require('moment-timezone');
 
 
-// exports.stagePool = createConnection({
-//     host: 'void.getvisitapp.internal',
-//     user: 'ashitk',
-//     password: 'sdf08923kndf',
-//     database: 'new_backend',
-//     waitForConnections: true,
-//     connectionLimit: 3, // Adjust as needed
-// });
-
-exports.stagePool = createConnection({
-    host: 'abyss.getvisitapp.com',
-    user: 'ashit',
-    password: 'Visit@AshitDev792',
-    database: 'new_backend',
-    waitForConnections: true,
-    connectionLimit: 3, // Adjust as needed
-});
-
-exports.localpool = createConnection2({
-    host: 'localhost',
-    user: 'care',
-    password: 'careisgenius',
-    database: 'care',
-    waitForConnections: true,
-    connectionLimit: 3, // Adjust as needed
-    Promise: bluebird,
-});
 
 // formatting 
 exports.formatName = (name) => {
