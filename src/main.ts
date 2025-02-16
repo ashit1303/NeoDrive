@@ -4,23 +4,26 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { log } from 'console';
 import { HttpExceptionFilter } from './core/http-exception.filter';
+import { ConfigService } from '@nestjs/config';
+
 
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const config = new DocumentBuilder()
-  .setTitle('API Documentation')
-  .setDescription('The API description')
-  .setVersion('1.0')
-  .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'JWT')
-  .build();
+  const config = new ConfigService()
   // app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new HttpExceptionFilter());
-  const document = SwaggerModule.createDocument(app, config);
-  log('Swagger is enabled',process.env.NODE_ENV);
-  // if(process.env.NODE_ENV === 'dev'){
+  log('Swagger is enabled',config.get('ENV'));
+  if(config.get('ENV') === 'dev'){
+    const swagConfig = new DocumentBuilder()
+    .setTitle('API Documentation')
+    .setDescription('The API description')
+    .setVersion('1.0')
+    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'JWT')
+    .build();
+    const document = SwaggerModule.createDocument(app, swagConfig);
     SwaggerModule.setup('api', app, document);
-  // }
+  }
   
 
   await app.listen(process.env.PORT ?? 3000);

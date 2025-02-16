@@ -18,10 +18,11 @@ import { ConfigModule } from '@nestjs/config';
 @Module({
   imports: [ AuthModule, MailerModule,  FileModule, UserModule,
     ConfigModule.forRoot({
-      isGlobal: true,
+      envFilePath: `.env-${process.env.NODE_ENV || 'dev'}`, // Dynamically loads .env file
+      isGlobal: true,  // Makes ConfigService available globally
     }),
   ],
   controllers: [AppController, SearchController, AuthController],
-  providers: [AppService, AuthService, PrismaService, LoggerService, CacheService, SearchService,JwtService],
+  providers: [AppService, AuthService, PrismaService, LoggerService, CacheService, SearchService, JwtService],
 })
 export class AppModule {}
