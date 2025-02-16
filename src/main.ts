@@ -5,10 +5,12 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { log } from 'console';
 import { HttpExceptionFilter } from './core/http-exception.filter';
 import { ConfigService } from '@nestjs/config';
+import { FluentBitLogger } from './core/logger/logger.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+  app.useLogger(new FluentBitLogger());
   // app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new HttpExceptionFilter());
   log('printing env', configService.get('ENV'));

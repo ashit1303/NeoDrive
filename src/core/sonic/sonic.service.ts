@@ -14,7 +14,8 @@ export class SonicService {
   }
   private sonicSearch = new SonicChannel.Search(
     this.sonicConfig
-  ).connect({
+  )
+  .connect({
     connected : function() {
       // Connected handler
       console.info("Sonic Channel succeeded to connect to host (search).");
@@ -44,10 +45,32 @@ export class SonicService {
   private sonicIngest = new SonicChannel.Ingest(
     this.sonicConfig
   )
+  .connect({
+    connected : function() {
+      // Connected handler
+      console.info("Sonic Channel succeeded to connect to host (ingest).");
+    },
   
-  private sonicControl = new SonicChannel.Control(
-    this.sonicConfig
-  )
+    disconnected : function() {
+      // Disconnected handler
+      console.error("Sonic Channel is now disconnected (ingest).");
+    },
+  
+    timeout : function() {
+      // Timeout handler
+      console.error("Sonic Channel connection timed out (ingest).");
+    },
+  
+    retrying : function() {
+      // Retry handler
+      console.error("Trying to reconnect to Sonic Channel (ingest)...");
+    }, 
+  
+    error : function(error) {
+      // Failure handler
+      console.error("Sonic Channel failed to connect to host (ingest).", error);
+    }
+  })
   
 
   async search(collection: string,bucket : string, query: string): Promise<string[]> {
@@ -66,11 +89,28 @@ export class SonicService {
         .catch((err) => reject(err));
     });
   }
-  async pop(collection: string,bucket : string, object:string, text: string): Promise<string[]> {
+  async remove(collection: string,bucket : string, object:string, text: string): Promise<string[]> {
     return new Promise((resolve, reject) => {
       // this.sonicIngest.push(collection,bucket,text, {lang: 'en'})
-      this.sonicIngest.push(collection,bucket, object, text, {lang: 'en'})
-        .then(() => resolve([]))
+      this.sonicIngest.pop(collection,bucket, object, text,)
+        .then((num) => resolve([]))
+        .catch((err) => reject(err));
+    });
+  }
+
+  async flushCollection(collection: string,): Promise<string[]> {
+    return new Promise((resolve, reject) => {
+      // this.sonicIngest.push(collection,bucket,text, {lang: 'en'})
+      this.sonicIngest.flushc(collection)
+        .then((num) => resolve([]))
+        .catch((err) => reject(err));
+    });
+  }
+  async flushBucket(collection: string, bucket: string): Promise<string[]> {
+    return new Promise((resolve, reject) => {
+      // this.sonicIngest.push(collection,bucket,text, {lang: 'en'})
+      this.sonicIngest.flushb(collection,bucket)
+        .then((num) => resolve([]))
         .catch((err) => reject(err));
     });
   }

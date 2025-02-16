@@ -5,7 +5,6 @@ import { AuthModule } from './core/auth/auth.module';
 import { PrismaService } from './core/prisma/prisma.service';
 import { MailerModule } from './core/mailer/mailer.module';
 import { FileModule } from './file/file.module';
-import { LoggerService } from './core/logger/logger.service';
 import { SonicService } from './core/sonic/sonic.service';
 import { AuthController } from './core/auth/auth.controller';
 import { AuthService } from './core/auth/auth.service';
@@ -15,7 +14,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RedisService } from './core/redis/redis.service';
 import { RedisConfigService } from './core/redis/redis.config';
 import { log } from 'console';
-import { SonicModule } from './core/sonic/sonic.modul';
+import { SonicModule } from './core/sonic/sonic.module';
 log('process.env.NODE_ENV', process.env.NODE_ENV);
 @Module({
   imports: [ 
@@ -29,7 +28,7 @@ log('process.env.NODE_ENV', process.env.NODE_ENV);
     AuthModule, MailerModule, FileModule, UserModule,SonicModule
   ],
   controllers: [AppController, AuthController],
-  providers: [AppService, AuthService, PrismaService, LoggerService, SonicService, JwtService, RedisService, RedisConfigService,],
+  providers: [AppService, AuthService, PrismaService, SonicService, JwtService, RedisService, RedisConfigService,],
 })
 
 export class AppModule {}
