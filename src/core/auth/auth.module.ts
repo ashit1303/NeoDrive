@@ -5,12 +5,14 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config'; // Import ConfigModule
+import { RedisModule } from '../redis/redis.module';
 
 @Module({
     imports: [
         PrismaModule,
         ConfigModule, // Make ConfigModule available here
         PassportModule,
+        RedisModule,
         JwtModule.registerAsync({
             imports: [ConfigModule],
             inject: [ConfigService],

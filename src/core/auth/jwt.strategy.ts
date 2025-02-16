@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config'; // For accessing JWT secret
-import { UserService } from '../user/user.service'; // Or your user service
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()

@@ -3,6 +3,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import * as argon from 'argon2';
 import { LoginReq } from "./auth.schema";
 import { JwtService } from '@nestjs/jwt';
+import { RedisService } from "../redis/redis.service";
 
 
 @Injectable({})
@@ -10,6 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 export class AuthService {
     constructor(
         private prisma: PrismaService,
+        private readonly redisService: RedisService,
         private jwtService: JwtService,
     ) { }
 
