@@ -1,10 +1,10 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, UsePipes } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { BasicResponse, LoginReq, loginReq, LoginRes } from './auth.schema';
-import { JoiValidate } from "src/joi/joi.service";
+import { JoiValidate } from "../joi/joi.service";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import joiToSwagger from "joi-to-swagger";
-import { StandardErrorResponse } from "src/common/http-exception.filter";
+import { StandardErrorResponse } from "../core/http-exception.filter";
 import { AuthGuard } from "@nestjs/passport";
 
 

@@ -3,7 +3,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { FileService } from './file.service';
 import { Express } from 'express';
 import { ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { StandardErrorResponse } from 'src/common/http-exception.filter';
+import { StandardErrorResponse } from '../core/http-exception.filter';
 
 
 @Controller('file')

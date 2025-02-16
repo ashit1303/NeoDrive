@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
-import { PrismaService } from "src/prisma/prisma.service";
+import { PrismaService } from "../prisma/prisma.service";
 import * as argon from 'argon2';
 import { LoginReq } from "./auth.schema";
 import { JwtService } from '@nestjs/jwt';
