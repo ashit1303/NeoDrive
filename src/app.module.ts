@@ -6,8 +6,7 @@ import { PrismaService } from './core/prisma/prisma.service';
 import { MailerModule } from './core/mailer/mailer.module';
 import { FileModule } from './file/file.module';
 import { LoggerService } from './core/logger/logger.service';
-import { SearchService } from './core/sonic/search.service';
-import { SearchController } from './core/sonic/search.controller';
+import { SonicService } from './core/sonic/sonic.service';
 import { AuthController } from './core/auth/auth.controller';
 import { AuthService } from './core/auth/auth.service';
 import { UserModule } from './user/user.module';
@@ -16,6 +15,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RedisService } from './core/redis/redis.service';
 import { RedisConfigService } from './core/redis/redis.config';
 import { log } from 'console';
+import { SonicModule } from './core/sonic/sonic.modul';
 log('process.env.NODE_ENV', process.env.NODE_ENV);
 @Module({
   imports: [ 
@@ -26,10 +26,10 @@ log('process.env.NODE_ENV', process.env.NODE_ENV);
       // envFilePath: null,
       isGlobal: true,  // Makes ConfigService available globally
     }),
-    AuthModule, MailerModule, FileModule, UserModule,
+    AuthModule, MailerModule, FileModule, UserModule,SonicModule
   ],
-  controllers: [AppController, SearchController, AuthController],
-  providers: [AppService, AuthService, PrismaService, LoggerService, SearchService, JwtService, RedisService, RedisConfigService,],
+  controllers: [AppController, AuthController],
+  providers: [AppService, AuthService, PrismaService, LoggerService, SonicService, JwtService, RedisService, RedisConfigService,],
 })
 
 export class AppModule {}

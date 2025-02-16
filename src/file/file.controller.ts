@@ -1,14 +1,15 @@
-import { BadRequestException, Controller, FileTypeValidator, MaxFileSizeValidator, ParseFilePipe, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Controller, FileTypeValidator, MaxFileSizeValidator, ParseFilePipe, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileService } from './file.service';
-import { Express } from 'express';
+import { Express, query } from 'express';
 import { ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { StandardErrorResponse } from '../core/http-exception.filter';
+import { SonicService } from 'src/core/sonic/sonic.service';
 
 
 @Controller('file')
 export class FileController {
-  constructor(private readonly fileService: FileService) {}
+  constructor(private readonly fileService: FileService, private readonly sonicService: SonicService) {}
 
   @Post('upload')
   @ApiOperation({ summary: 'Upload a file' })
@@ -31,5 +32,9 @@ export class FileController {
         console.error("error in file upload", error);
         throw new BadRequestException("File upload failed");
     }
+  }
+  @Post('search')
+  async searchFile(@Query('q') file: string) {
+    return this.fileService.searchFile(file);
   }
 }

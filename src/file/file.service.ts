@@ -1,12 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Query } from '@nestjs/common';
 import { PrismaService } from '../core/prisma/prisma.service';
 import * as fs from 'fs';
 import * as crypto from 'crypto';
+import { SonicService } from 'src/core/sonic/sonic.service';
 
 
 @Injectable()
 export class FileService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private sonicService: SonicService) {}
+  
+  private async generateSHA(filePath: string): Promise<string> {
+    const fileBuffer = fs.readFileSync(filePath);
+    const hashSum = crypto.createHash('sha256');
+    hashSum.update(fileBuffer);
+    return hashSum.digest('hex');
+  }
   async uploadFile(file: Express.Multer.File) {
     const filePath = file.path;
     const name = file.originalname;
@@ -29,13 +37,10 @@ export class FileService {
 
     return { success:true, message: 'File uploaded successfully', data: shaHash };
   }
-
-  private async generateSHA(filePath: string): Promise<string> {
-    const fileBuffer = fs.readFileSync(filePath);
-    const hashSum = crypto.createHash('sha256');
-    hashSum.update(fileBuffer);
-    return hashSum.digest('hex');
+  
+  async searchFile(@Query('q') query: string) {
+    let resp = await this.sonicService.search('files', 'default', query);
+    return { success:true, message: 'File uploaded successfully', data: resp };
   }
 
-  
 }
