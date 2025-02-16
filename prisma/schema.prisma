@@ -1,0 +1,302 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model vaddress {
+  id          Int                  @id @default(autoincrement()) @db.UnsignedInt
+  address     String?              @db.TinyText
+  userId      Int?
+  pincode     Int?                 @db.UnsignedInt
+  coordinates Unsupported("point") @default(dbgenerated("(st_geometryfromtext('Point(0 0)'))"))
+  createdAt   DateTime             @default(now()) @db.DateTime(0)
+  updatedAt   DateTime             @default(now()) @db.DateTime(0)
+
+  @@index([coordinates(length: 32)], map: "coordinates")
+}
+
+model vdoctors {
+  id            Int      @id @default(autoincrement()) @db.UnsignedInt
+  name          String?  @db.VarChar(50)
+  phone         String   @db.VarChar(10)
+  email         String?  @db.VarChar(100)
+  gender        String?  @db.VarChar(1)
+  speciality    String?  @db.VarChar(255)
+  registrations String?  @db.VarChar(100)
+  charges       Int?
+  degrees       String?  @db.VarChar(200)
+  college       String?  @db.VarChar(200)
+  city          String?  @db.VarChar(50)
+  services      String?  @db.TinyText
+  education     String?  @db.Text
+  organizations String?  @db.TinyText
+  createdAt     DateTime @default(now()) @db.DateTime(0)
+  updatedAt     DateTime @default(now()) @db.DateTime(0)
+}
+
+model vusers {
+  id        Int       @id @default(autoincrement()) @db.UnsignedInt
+  verified  Boolean   @default(false)
+  userId    Int?
+  pass      String?   @db.VarChar(127)
+  patientId Int?
+  name      String?   @db.VarChar(50)
+  dob       DateTime? @db.Date
+  gender    String?   @db.VarChar(1)
+  phone     String?   @unique(map: "vusers_pk") @db.VarChar(10)
+  email     String?   @db.VarChar(100)
+  orgId     Int?      @db.UnsignedSmallInt
+  createdAt DateTime  @default(now()) @db.Timestamp(0)
+  updatedAt DateTime  @default(now()) @db.Timestamp(0)
+}
+
+model countryMaster {
+  code     String  @id @db.VarChar(2)
+  country  String? @db.VarChar(31)
+  phExt    String? @db.VarChar(7)
+  phMaxLen Int?    @db.TinyInt
+  phMinLen Int?    @db.TinyInt
+}
+
+model diagTestsMaster {
+  id                      Int                   @id @default(autoincrement()) @db.UnsignedInt
+  testId                  Int?                  @db.UnsignedInt
+  name                    String?               @db.VarChar(127)
+  commonName              String?               @db.Text
+  fasting                 Boolean?              @default(false)
+  type                    diagTestsMaster_type?
+  femaleTechnicianRequire Boolean?              @default(false)
+  created_at              DateTime              @default(now()) @db.DateTime(0)
+  updated_at              DateTime              @default(now()) @db.DateTime(0)
+}
+
+model docDetails {
+  panNum           String  @id @db.VarChar(10)
+  name             String? @db.VarChar(63)
+  accNumber        String? @db.VarChar(63)
+  ifscCode         String? @db.VarChar(63)
+  upiId            String? @db.VarChar(63)
+  costPrice        String? @db.VarChar(63)
+  preferredPayment String? @db.VarChar(7)
+  panName          String? @db.VarChar(63)
+  panLink          String? @db.VarChar(200)
+}
+
+model drugsMaster {
+  id           Int       @id @default(autoincrement()) @db.UnsignedInt
+  itemCode     String?   @unique(map: "itemCodeUnque") @db.VarChar(31)
+  brandName    String    @db.VarChar(255)
+  companyName  String?   @db.VarChar(127)
+  type         String    @db.VarChar(63)
+  composition  String?   @db.VarChar(255)
+  compStrength String?   @db.VarChar(127)
+  itemSize     Int?      @db.UnsignedSmallInt
+  itemCount    Int?      @db.UnsignedSmallInt
+  itemUnit     String?   @db.VarChar(15)
+  rxReq        Boolean?  @default(false)
+  category     String?   @db.VarChar(50)
+  description  String?   @db.Text
+  img          String?   @db.VarChar(255)
+  createdAt    DateTime? @default(now()) @db.DateTime(0)
+  updatedAt    DateTime? @default(now()) @db.DateTime(0)
+}
+
+model files {
+  id       Int       @id @default(autoincrement()) @db.UnsignedInt
+  name     String    @db.VarChar(127)
+  size     BigInt    @default(0) @db.UnsignedBigInt
+  sha      String    @unique(map: "sha") @db.VarChar(64)
+  filePath String    @db.VarChar(255)
+  createAt DateTime? @default(now()) @db.Timestamp(0)
+  updateAt DateTime? @db.Timestamp(0)
+}
+
+model partnerPincodes {
+  id        Int      @id @default(autoincrement()) @db.UnsignedInt
+  pincode   Int      @db.UnsignedInt
+  partnerId Int      @db.UnsignedInt
+  sun       Boolean?
+  mon       Boolean?
+  tue       Boolean?
+  wed       Boolean?
+  thu       Boolean?
+  fri       Boolean?
+  sat       Boolean?
+  createdAt DateTime @default(now()) @db.DateTime(0)
+  updatedAt DateTime @default(now()) @db.DateTime(0)
+
+  @@index([partnerId, pincode], map: "partnerPincodes_partnerId_pincode_index")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model partnersCenters {
+  id                Int                               @id @default(autoincrement()) @db.UnsignedInt
+  partnerId         Int
+  centerId          Int?                              @db.UnsignedInt
+  address           String                            @db.Text
+  coordinates       Unsupported("point")              @default(dbgenerated("(st_geometryfromtext('Point(0 0)'))"))
+  pincode           Int
+  active            Int?                              @default(0) @db.TinyInt
+  collectionRadius  Float?                            @default(0)
+  bookingMedium     partnersCenters_bookingMedium?
+  bookingEmail      String?                           @db.VarChar(200)
+  bookingPhone      Float?
+  escalationMedium  partnersCenters_escalationMedium?
+  escalationEmail   String?                           @db.VarChar(200)
+  escalationPhone   Float?
+  centerIdByPartner String?                           @db.VarChar(31)
+  createdAt         DateTime                          @default(now()) @db.DateTime(0)
+  updatedAt         DateTime                          @default(now()) @db.DateTime(0)
+
+  @@unique([centerId, partnerId], map: "partnersCenters_pk")
+}
+
+model partnersCentersTests {
+  id        Int      @id @default(autoincrement()) @db.UnsignedInt
+  centerId  Int      @db.UnsignedInt
+  testId    Int      @db.UnsignedInt
+  active    Boolean? @default(false)
+  createdAt DateTime @default(now()) @db.DateTime(0)
+  updatedAt DateTime @default(now()) @db.DateTime(0)
+}
+
+model partnersMaster {
+  id               Int                            @id @default(autoincrement())
+  partnerId        Int?                           @unique(map: "partnersMaster_pk") @db.UnsignedInt
+  name             String?                        @db.VarChar(127)
+  collectionCharge Int                            @default(0)
+  collectionType   partnersMaster_collectionType?
+  minCartValue     Int                            @default(0) @db.UnsignedInt
+  active           Boolean                        @default(false)
+  pathAvailable    Boolean                        @default(false)
+  centerAvailable  Boolean                        @default(false)
+  isApi            Boolean                        @default(false)
+  credit           Boolean                        @default(false)
+  img              String?                        @db.VarChar(255)
+  tds              Int?                           @default(0) @db.TinyInt
+  partnerMailIds   String?                        @db.VarChar(511)
+  priority         Int?                           @db.TinyInt
+  payeeName        String?                        @db.VarChar(63)
+  panNo            String?                        @db.VarChar(10)
+  accountNumber    String?                        @db.VarChar(127)
+  accountType      String?                        @db.VarChar(15)
+  ifscCode         String?                        @db.VarChar(31)
+  upiPhone         String?                        @db.VarChar(15)
+  upiAddress       String?                        @db.VarChar(50)
+  spocName         String?                        @db.VarChar(31)
+  spocPhone        String?                        @db.VarChar(15)
+  spocEmail        String?                        @db.VarChar(63)
+  billCycle        partnersMaster_billCycle?
+  payPreference    partnersMaster_payPreference?
+  createdAt        DateTime                       @default(now()) @db.DateTime(0)
+  updatedAt        DateTime                       @default(now()) @db.DateTime(0)
+}
+
+model partnersTests {
+  id              Int      @id @default(autoincrement()) @db.UnsignedInt
+  partnerId       Int      @db.UnsignedInt
+  testId          Int      @db.UnsignedInt
+  partnerTestCode String   @db.VarChar(127)
+  partnerTestName String?  @db.VarChar(127)
+  mrp             Int      @db.UnsignedInt
+  sp              Int      @db.UnsignedInt
+  cost            Int      @db.UnsignedInt
+  discountMargin  Int?     @default(20)
+  active          Int      @default(0) @db.TinyInt
+  estimated_TAT   Int      @default(24) @db.TinyInt
+  created_at      DateTime @default(now()) @db.DateTime(0)
+  updated_at      DateTime @default(now()) @db.DateTime(0)
+
+  @@unique([partnerId, testId], map: "partnersTests_pk")
+}
+
+model pincodeMaster {
+  pincode     Int                   @id @db.UnsignedInt
+  division    String?               @db.VarChar(50)
+  region      String?               @db.VarChar(50)
+  circle      String?               @db.VarChar(40)
+  taluk       String?               @db.VarChar(50)
+  district    String?               @db.VarChar(40)
+  state       String?               @db.VarChar(25)
+  city        String?               @db.VarChar(35)
+  coordinates Unsupported("point")?
+  zone        pincodeMaster_zone?
+  tier        Int                   @default(3) @db.TinyInt
+  top_50_city Int                   @default(0) @db.TinyInt
+  top_25_city Int                   @default(0) @db.TinyInt
+  createdAt   DateTime              @default(now()) @db.Timestamp(0)
+  updatedAt   DateTime              @default(now()) @db.Timestamp(0)
+}
+
+model playing {
+  id    Int     @id @default(autoincrement())
+  work  String  @default("nowork") @db.VarChar(10)
+  stage String? @db.VarChar(20)
+  time  Int?
+}
+
+model vacCenters {
+  id          Int                   @id @default(autoincrement()) @db.UnsignedInt
+  active      Int                   @default(0) @db.TinyInt
+  pincode     Int?                  @db.UnsignedInt
+  name        String?               @db.VarChar(150)
+  address     String?               @db.TinyText
+  coordinates Unsupported("point")?
+  img         String?               @db.VarChar(255)
+  phNumber    String?               @db.VarChar(12)
+  emrNumber   String?               @db.VarChar(12)
+  tier        Boolean?
+  type        vacCenters_type?
+  createdAt   DateTime              @default(now()) @db.DateTime(0)
+  updatedAt   DateTime              @default(now()) @db.DateTime(0)
+}
+
+enum partnersMaster_collectionType {
+  onMinCart
+  always
+}
+
+enum diagTestsMaster_type {
+  patho
+  radio
+}
+
+enum partnersCenters_bookingMedium {
+  email
+  phone
+}
+
+enum pincodeMaster_zone {
+  north
+  south
+  east
+  west
+}
+
+enum vacCenters_type {
+  hospital
+  clinic
+}
+
+enum partnersCenters_escalationMedium {
+  email
+  phone
+}
+
+enum partnersMaster_billCycle {
+  before
+  after
+  within_2  @map("within 2")
+  within_7  @map("within 7")
+  within_15 @map("within 15")
+  Days      @map("30 Days")
+}
+
+enum partnersMaster_payPreference {
+  Acc
+  Upi
+}
