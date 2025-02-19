@@ -123,19 +123,19 @@ if [ "$USE_ROOT_ACCESS" = "y" ]; then
     if [ -x "$(command -v $package)" ]; then
         print_message "$package is already installed... Skipping..." skip
     else
-        if["$package" = "arp-scan"]; then
+        if ["$package" = "arp-scan"]; then
             if [ -x "$(command -v arp-scan)" ]; then
                 print_message "arp-scan is already installed and running... Skipping..." skip
                 continue
             fi
         fi
-        if["$package" = "iproute2"]; then
+        if [ "$package" = "iproute2"]; then
             if [ -x "$(command -help ip)" ]; then
                 print_message "iproute2 is already installed and running... Skipping..." skip
                 continue
             fi
         fi
-        if["$package" = "nmap"]; then
+        if [ "$package" = "nmap"]; then
             if [ -x "$(command nmap)" ]; then
                 print_message "nmap is already installed and running... Skipping..." skip
                 continue
@@ -159,26 +159,26 @@ for package in figlet curl tree wget nano iptables msmtp arp-scan openssh git ng
     if [ -x "$(command -v $package)" ]; then
         print_message "$package is already installed... Skipping..." skip
     else
-        if["$package" = "redis-server"]; then
-            if [ -x "$(command -v redis-cli)" ]; then
+        if [ "$package" = "redis-server" ]; then
+            if [ -x "$(command -v redis-cli)"  ]; then
                 print_message "Redis is already installed and running... Skipping..." skip
                 continue
             fi
         fi
-        if["$package" = "iproute2"]; then
-            if [ -x "$[command -help ip)" ]; then
+        if [ "$package" = "iproute2" ]; then
+            if [ -x "$[command -help ip)"  ]; then
                 print_message "iproute2 is already installed and running... Skipping..." skip
                 continue
             fi
         fi
-        if["$package" = "openssh"]; then
-            if [ -x "$(command sshd)" ]; then
+        if [ "$package" = "openssh" ]; then
+            if [ -x "$(command sshd)"  ]; then
                 print_message "openssh is already installed and running... Skipping..." skip
                 continue
             fi
         fi
-        if["$package" = "nodejs"]; then
-            if [ -x "$(command -v node)" ]; then
+        if [ "$package" = "nodejs" ]; then
+            if [ -x "$(command -v node)"  ]; then
                 print_message "nodejs is already installed and running... Skipping..." skip
                 continue
             fi
