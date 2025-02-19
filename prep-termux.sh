@@ -119,79 +119,68 @@ pkg update -y && pkg upgrade -y
 
 if [ "$USE_ROOT_ACCESS" = "y" ]; then
     pkg install root-repo -y && pkg update -y
-    for package in iproute2 nmap arp-scan tsu ; do
-    if [ -x "$(command -v $package)" ]; then
-        print_message "$package is already installed... Skipping..." skip
-    else
-        if [ "$package" = "arp-scan" ]; then
-            if [ -x "$(command -v arp-scan)" ]; then
-                print_message "arp-scan is already installed and running... Skipping..." skip
-                continue
-            fi
+    
+    for package in iproute2 nmap arp-scan tsu; do
+        if command -v "$package" &>/dev/null; then
+            print_message "$package is already installed... Skipping..." skip
+            continue
         fi
+
         if [ "$package" = "iproute2" ]; then
-            if [ -x "$(command -help ip)" ]; then
+            if command -v ip &>/dev/null; then
                 print_message "iproute2 is already installed and running... Skipping..." skip
                 continue
             fi
-        fi
-        if [ "$package" = "nmap" ]; then
-            if [ -x "$(command nmap)" ]; then
-                print_message "nmap is already installed and running... Skipping..." skip
+        elif [ "$package" = "nmap" ]; then
+            if command -v nmap &>/dev/null; then
+                print_message "Nmap is already installed and running... Skipping..." skip
                 continue
             fi
         fi
+
         print_message "$package is not installed, installing..." info
-        pkg install $package -y
-        if [ -x "$(command -v $package)" ]; then
+        if pkg install "$package" -y; then
             print_message "$package installed successfully!" success
         else
             print_message "Failed to install $package" fail
         fi
-    fi
     done
 fi
 
 print_message "Installing necessary packages..." info
 
 # pkg install tsu figlet openssh git curl tree wget nano nodejs termux-services iptables iproute2 nmap nginx arp-scan mariadb -y
-for package in figlet curl tree wget nano iptables msmtp arp-scan openssh git nginx nodejs mariadb redis ; do
-    if [ -x "$(command -v $package)" ]; then
+for package in figlet curl tree wget nano iptables msmtp arp-scan openssh git nginx nodejs mariadb redis; do
+    if command -v "$package" &>/dev/null; then
         print_message "$package is already installed... Skipping..." skip
-    else
-        if [ "$package" = "redis-server" ]; then
-            if [ -x "$(command -v redis-cli)"  ]; then
-                print_message "Redis is already installed and running... Skipping..." skip
-                continue
-            fi
+        continue
+    fi
+
+    if [ "$package" = "redis" ]; then
+        if command -v redis-cli &>/dev/null; then
+            print_message "Redis is already installed and running... Skipping..." skip
+            continue
         fi
-        if [ "$package" = "iproute2" ]; then
-            if [ -x "$(command -help ip)"  ]; then
-                print_message "iproute2 is already installed and running... Skipping..." skip
-                continue
-            fi
+    elif [ "$package" = "openssh" ]; then
+        if command -v sshd &>/dev/null; then
+            print_message "OpenSSH is already installed and running... Skipping..." skip
+            continue
         fi
-        if [ "$package" = "openssh" ]; then
-            if [ -x "$(command sshd)"  ]; then
-                print_message "openssh is already installed and running... Skipping..." skip
-                continue
-            fi
-        fi
-        if [ "$package" = "nodejs" ]; then
-            if [ -x "$(command -v node)"  ]; then
-                print_message "nodejs is already installed and running... Skipping..." skip
-                continue
-            fi
-        fi
-        print_message "$package is not installed, installing..." info
-        pkg install $package -y
-        if [ -x "$(command -v $package)" ]; then
-            print_message "$package installed successfully!" success
-        else
-            print_message "Failed to install $package" fail
+    elif [ "$package" = "nodejs" ]; then
+        if command -v node &>/dev/null; then
+            print_message "Node.js is already installed and running... Skipping..." skip
+            continue
         fi
     fi
+
+    print_message "$package is not installed, installing..." info
+    if pkg install "$package" -y; then
+        print_message "$package installed successfully!" success
+    else
+        print_message "Failed to install $package" fail
+    fi
 done
+
 
 echo "figlet -f slant 'Termux'" >> ~/.bashrc
 echo 'PS1='\''\[\e[1;32m\]\u@\h:\[\e[0m\]\[\e[1;34m\]$(if [[ "$PWD" == "$HOME" ]]; then echo "~"; else echo "~${PWD#$HOME/}"; fi)\[\e[0m\]\$ '\'' ' >> ~/.bashrc
