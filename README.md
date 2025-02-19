@@ -114,7 +114,7 @@ prevent table creation if entry not found in table
 puppeteer 
 
 
- I want to create a nest project server to upload file and its stored with entry and keep track using sha for duplicate file (argon2)and file  name can be searched using sonic search and logs  can be maintained and redis for coaching 
+ I want to create a nest project server to upload file and its stored with entry and keep track using sha for duplicate file ()and file  name can be searched using sonic search and logs  can be maintained and redis for coaching 
 duc by noip  for dynamic update ip on noip
 nginx to handle 2 clusters and 2 instance of nodejs
 fluentbit with sonic search sonic-channel

@@ -238,36 +238,20 @@ update_configs() {
             if [ "$PACKAGE" = "mariadb" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.conf"
                 # insert into boot script
-                echo "mariadb-safe --defaults-file=$CONFIG_PATH &" >> "$BOOT_SCRIPT"
+                cp -r $PREFIX/var/lib/mysql/* $DATA_PATH
+                echo "mariadbd-safe --datadir=$DATA_PATH --log-error=$LOGS_PATH/error.log &" >> "$BOOT_SCRIPT"
                 cat > "$CONFIG_PATH" <<EOF
 [mysqld]
 # Basic Settings
-user = mysql
 port = $PORT
-bind-address = $BIND_IP
 
 # Custom Database Directory
 datadir = $DATA_PATH
-socket=$PREFIX/var/run/mysqld.sock
 
 # Logging
 log-error = $LOGS_PATH/error.log
 slow-query-log = 1
 slow-query-log-file = $LOGS_PATH/slow.log
-
-# Performance Tweaks
-innodb_buffer_pool_size = 256M
-max_connections = 30
-query_cache_size = 16M
-query_cache_limit = 4M
-innodb_file_per_table = 1
-innodb_flush_log_at_trx_commit = 2
-innodb_log_file_size = 256M
-innodb_flush_method = O_DIRECT
-
-# Security Settings
-# Disabling symbolic links is recommended to prevent security vulnerabilities
-symbolic-links = 0
 EOF
             fi
 
