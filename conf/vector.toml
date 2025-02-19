@@ -1,0 +1,31 @@
+# Vector
+
+# Global configuration
+data_dir = "$DATA_PATH/$PACKAGE/"
+
+# Sources
+[sources.nest_logs]
+type = "socket"
+address = "0.0.0.0:9000"
+mode = "tcp"
+
+# Transform: Parse log format
+[transforms.parse_logs]
+type = "remap"
+inputs = ["file_logs"]
+source = '''
+. = parse_regex!(.message, r'^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (?P<level>\w+) (?P<message>.*)$')
+'''
+
+# Sinks
+[sinks.victoria_metrics]
+type = "prometheus_remote_write"
+inputs = ["system_metrics"]
+endpoint = "http://localhost:8428/api/v1/write"
+
+[sinks.zincsearch]
+type = "http"
+inputs = ["parse_logs"]
+uri = "http://localhost:4080/api/default/_bulk"
+method = "post"
+encoding.codec = "json"
