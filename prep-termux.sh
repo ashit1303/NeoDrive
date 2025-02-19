@@ -26,8 +26,6 @@ print_message() {
 header() {
     COLOR="\e[1;35m" # Purple
     RESET="\e[0m"     # Reset color
-
-    echo -e "${COLOR}"
     cat <<EOF
 
 # Install Git
@@ -61,15 +59,13 @@ if [ "$USE_ROOT_ACCESS" = "y" ]; then
     PREFIX="/data/data/com.termux/files/usr"
 else  
     print_message "ROOT ACCESS NOT AVAILABLE" fail
-    trap 'echo "Aborted due to an error"' ERR
-    print_message "ROOT ACCESS NOT AVAILABLE" fail
-    exit 1
+    # trap 'echo "Aborted due to an error"' 
+    # exit 1
     # PREFIX="$HOME/.termux"
 fi
 
 read -rp "Enter master username(admin): " MASTER_USER
 read -rp "Enter master password(admin): " MASTER_PASSWORD
-
 read -rp "Where do you want to keep your data files 1) ~/xData 2) ~/../xData 3) ~/.termux/xData 4) ~/storage/shared/xData (1 or 2 or 3 or 4)" PROD_DIR 
 read -rp "Do you want to run services on start? (y/n): " RUN_SERVICES
 
