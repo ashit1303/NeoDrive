@@ -121,8 +121,13 @@ print_message "Setting up termux..." info
 
 print_message "Updating and upgrading packages..." info
 
-pkg install root-repo -y && pkg upgrade -y && pkg upgrade -y
+pkg upgrade -y && pkg upgrade -y
 
+if [ "$USE_ROOT_ACCESS" = "y" ]; then
+    pkg install root-repo -y
+    pkg upgrade -y
+    pkg install tsu -y
+fi
 
 print_message "Installing necessary packages..." info
 
@@ -183,7 +188,7 @@ update_configs() {
             PORT=$(read_config "$PACKAGE" "port")
             BIND_IP=$(read_config "$PACKAGE" "bind_ip")
             # if BIND_IP ===0.0.0.0 then open firewall 
-            if [ "$BIND_IP" = "0.0.0.0" ]; then
+            if [ "$BIND_IP" = "0.0.0.0" && "$USE_ROOT_ACCESS" = "y"  ]; then
                 sudo iptables -A INPUT -p tcp --dport "$PORT" -j ACCEPT
             fi
             # Define paths
