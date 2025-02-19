@@ -123,19 +123,19 @@ if [ "$USE_ROOT_ACCESS" = "y" ]; then
     if [ -x "$(command -v $package)" ]; then
         print_message "$package is already installed... Skipping..." skip
     else
-        if ["$package" = "arp-scan"]; then
+        if [ "$package" = "arp-scan" ]; then
             if [ -x "$(command -v arp-scan)" ]; then
                 print_message "arp-scan is already installed and running... Skipping..." skip
                 continue
             fi
         fi
-        if [ "$package" = "iproute2"]; then
+        if [ "$package" = "iproute2" ]; then
             if [ -x "$(command -help ip)" ]; then
                 print_message "iproute2 is already installed and running... Skipping..." skip
                 continue
             fi
         fi
-        if [ "$package" = "nmap"]; then
+        if [ "$package" = "nmap" ]; then
             if [ -x "$(command nmap)" ]; then
                 print_message "nmap is already installed and running... Skipping..." skip
                 continue
@@ -166,7 +166,7 @@ for package in figlet curl tree wget nano iptables msmtp arp-scan openssh git ng
             fi
         fi
         if [ "$package" = "iproute2" ]; then
-            if [ -x "$[command -help ip)"  ]; then
+            if [ -x "$(command -help ip)"  ]; then
                 print_message "iproute2 is already installed and running... Skipping..." skip
                 continue
             fi
@@ -194,14 +194,14 @@ for package in figlet curl tree wget nano iptables msmtp arp-scan openssh git ng
 done
 
 echo "figlet -f slant 'Termux'" >> ~/.bashrc
-echo 'PS1=\[\e[1;32m\]\u@\h:\[\e[0m\]\[\e[1;34m\]$(if [[ "$PWD" == "$HOME" ]]; then echo "~"; else echo "~${PWD#$HOME/}"; fi)\[\e[0m\]\$ ' >> ~/.bashrc
+echo 'PS1='\''\[\e[1;32m\]\u@\h:\[\e[0m\]\[\e[1;34m\]$(if [[ "$PWD" == "$HOME" ]]; then echo "~"; else echo "~${PWD#$HOME/}"; fi)\[\e[0m\]\$ '\'' ' >> ~/.bashrc
 
 # Download and extract the archive
 curl -L https://github.com/ashit1303/bash_scripts/releases/download/v1.0/aarch64.tar.xz -o aarch64.tar.xz
 tar -xf aarch64.tar.xz
 chmod +x aarch64/*
 # Move all extracted files to $PREFIX/bin
-mv -n aarch64/* $PREFIX/bin/
+mv -n aarch64/* "$PREFIX"/bin/
 
 # Clean up
 rm -rf aarch64 aarch64.tar.xz
@@ -235,7 +235,7 @@ update_configs() {
             PORT=$(read_config "$PACKAGE" "port")
             BIND_IP=$(read_config "$PACKAGE" "bind_ip")
             # if BIND_IP ===0.0.0.0 then open firewall 
-            if [ "$BIND_IP" = "0.0.0.0" && "$USE_ROOT_ACCESS" = "y"  ]; then
+            if [ "$BIND_IP" = "0.0.0.0" ] && [ "$USE_ROOT_ACCESS" = "y"  ]; then
                 sudo iptables -A INPUT -p tcp --dport "$PORT" -j ACCEPT
             fi
             # Define paths
@@ -690,7 +690,3 @@ fi
 # exposing 3306 & 4080 port if root access avaialable
 
 print_message "Setup complete! Reboot your device to confirm automatic startup." info
-
-
-
-
