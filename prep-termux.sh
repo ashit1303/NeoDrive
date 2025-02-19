@@ -203,25 +203,24 @@ CONFIG_FILE="./pkgs.ini"
 # Ensure required directories exist
 mkdir -p "$CONF_DIR" "$DATA_DIR" "$LOGS_DIR"
 
-# Function to read values from the config file
+# Function to read values from pkgs.ini
 read_config() {
-    local package="$1"
-    local key="$2"
-    local value=$(awk -F= -v section="[$package]" -v key="$key" '
-        $0 ~ section {found=1; next} 
-        found && $1 ~ key {print $2; exit}
-    ' "$CONFIG_FILE" | tr -d '[:space:]')
-
-    echo "$value"
+    local package=$1
+    local key=$2
+    awk -F '=' -v section="[$package]" -v key="$key" '
+    $0 == section {found=1; next} 
+    found && $1 == key {gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2; exit}
+    ' "$CONFIG_FILE"
 }
 
 print_message "Creating startup script..." info
 # Function to update configs
 update_configs() {
-    while IFS= read -r line; do
-        if [[ $line =~ ^\[([a-zA-Z0-9_-]+)\]$ ]]; then
-            PACKAGE="${BASH_REMATCH[1]}"
+    PACKAGES=$(awk -F '[][]' '/\[.*\]/ {print $2}' "$CONFIG_FILE")
 
+        for PACKAGE in $PACKAGES; do
+            PORT=$(read_config "$PACKAGE" "port")
+            BIND_IP=$(read_config "$PACKAGE" "bind_ip")
             # Read values from config file
             PORT=$(read_config "$PACKAGE" "port")
             BIND_IP=$(read_config "$PACKAGE" "bind_ip")
@@ -445,7 +444,7 @@ appendonly yes
 appendfilename "appendonly.aof"
 
 # Enable password authentication (optional)
-requirepass $MASTER_PASSWORD  # Change this to a strong password
+#requirepass $MASTER_PASSWORD  # Change this to a strong password
 
 # Enable Redis Cluster (optional)
 # cluster-enabled yes
@@ -576,9 +575,9 @@ index:
           type: "standard"
 EOF
             fi
-fi
 
-    done < "$CONFIG_FILE"
+
+    done 
 }
 
 update_configs
@@ -591,10 +590,7 @@ if [ "$RUN_SERVICES" = "y" ]; then
     termux-setup-storage
     print_message "Running services on startup..." info
     "$BOOT_SCRIPT"
-fi
-
-
-# Verify Mariadb is running
+    # Verify Mariadb is running
 print_message "Verifying Mariadb is running..." info
 if mariadb-admin ping &>/dev/null; then
     echo "Mariadb is running successfully!" success
@@ -656,6 +652,7 @@ else
     print_message "Sonic failed to start. Check the script and logs."
 fi
 
+fi
 
 # Pending tasks 
 # Hold liftbridge and fluent bit
