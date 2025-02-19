@@ -113,22 +113,74 @@ print_message "Setting up termux..." info
 
 print_message "Updating and upgrading packages..." info
 
-pkg upgrade -y && pkg upgrade -y
+pkg update -y && pkg upgrade -y
 
 if [ "$USE_ROOT_ACCESS" = "y" ]; then
-    pkg install root-repo -y
-    pkg upgrade -y
-    pkg install mongodb -y
-    pkg install tsu -y
+    pkg install root-repo -y && pkg update -y
+    for package in iproute2 nmap arp-scan tsu ; do
+    if [ -x "$(command -v $package)" ]; then
+        print_message "$package is already installed... Skipping..." skip
+    else
+        if("$package" = "arp-scan"); then
+            if [ -x "$(command -v arp-scan)" ]; then
+                print_message "arp-scan is already installed and running... Skipping..." skip
+                continue
+            fi
+        fi
+        if("$package" = "iproute2"); then
+            if [ -x "$(command -help ip)" ]; then
+                print_message "iproute2 is already installed and running... Skipping..." skip
+                continue
+            fi
+        fi
+        if("$package" = "nmap"); then
+            if [ -x "$(command nmap)" ]; then
+                print_message "nmap is already installed and running... Skipping..." skip
+                continue
+            fi
+        fi
+        print_message "$package is not installed, installing..." info
+        pkg install $package -y
+        if [ -x "$(command -v $package)" ]; then
+            print_message "$package installed successfully!" success
+        else
+            print_message "Failed to install $package" fail
+        fi
+    fi
+    done
 fi
 
 print_message "Installing necessary packages..." info
 
 # pkg install tsu figlet openssh git curl tree wget nano nodejs termux-services iptables iproute2 nmap nginx arp-scan mariadb -y
-for package in figlet  curl tree wget nano iptables iproute2 nmap msmtp arp-scan openssh git nginx nodejs mariadb redis ; do
+for package in figlet curl tree wget nano iptables msmtp arp-scan openssh git nginx nodejs mariadb redis ; do
     if [ -x "$(command -v $package)" ]; then
         print_message "$package is already installed... Skipping..." skip
     else
+        if("$package" = "redis-server"); then
+            if [ -x "$(command -v redis-cli)" ]; then
+                print_message "Redis is already installed and running... Skipping..." skip
+                continue
+            fi
+        fi
+        if("$package" = "iproute2"); then
+            if [ -x "$(command -help ip)" ]; then
+                print_message "iproute2 is already installed and running... Skipping..." skip
+                continue
+            fi
+        fi
+        if("$package" = "openssh"); then
+            if [ -x "$(command sshd)" ]; then
+                print_message "openssh is already installed and running... Skipping..." skip
+                continue
+            fi
+        fi
+        if("$package" = "nodejs"); then
+            if [ -x "$(command -v node)" ]; then
+                print_message "nodejs is already installed and running... Skipping..." skip
+                continue
+            fi
+        fi
         print_message "$package is not installed, installing..." info
         pkg install $package -y
         if [ -x "$(command -v $package)" ]; then
@@ -140,7 +192,7 @@ for package in figlet  curl tree wget nano iptables iproute2 nmap msmtp arp-scan
 done
 
 echo "figlet -f slant 'Termux'" >> ~/.bashrc
-echo PS1='\[\e[1;32m\]\u@\h:\[\e[0m\]\[\e[1;34m\]$(if [[ "$PWD" == "$HOME" ]]; then echo "~"; else echo "~${PWD#$HOME/}"; fi)\[\e[0m\]\$ ' >> ~/.bashrc
+echo 'PS1=\[\e[1;32m\]\u@\h:\[\e[0m\]\[\e[1;34m\]$(if [[ "$PWD" == "$HOME" ]]; then echo "~"; else echo "~${PWD#$HOME/}"; fi)\[\e[0m\]\$ ' >> ~/.bashrc
 
 # Download and extract the archive
 curl -L https://github.com/ashit1303/bash_scripts/releases/download/v1.0/aarch64.tar.xz -o aarch64.tar.xz
@@ -153,7 +205,7 @@ mv -n aarch64/* $PREFIX/bin/
 rm -rf aarch64 aarch64.tar.xz
 
 
-CONFIG_FILE="$HOME/pkgs.ini"
+CONFIG_FILE="./pkgs.ini"
 
 # Ensure required directories exist
 mkdir -p "$CONF_DIR" "$DATA_DIR" "$LOGS_DIR"
@@ -630,6 +682,7 @@ fi
 # ollama run qwen2.5-coder:0.5b
 # ollama run deepscaler:1.5b-preview-q4_K_M
 # sudo arp-scan  --localnet
+# mongodb on hold
 # sudo nmap -sS -p- 192.168.97.47
 # exposing 3306 & 4080 port if root access avaialable
 
