@@ -77,12 +77,12 @@ read -rp "Do you want to run services on start? (y/n): " RUN_SERVICES
 if [ "$PROD_DIR" = "1" ]; then
     PROD_DIR="$HOME/xData"
 elif [ "$PROD_DIR" = "2" ]; then
-    PROD_DIR="$PREFIX/../xData"
+    PROD_DIR="$HOME/../xData"
 elif [ "$PROD_DIR" = "3" ]; then
-    PROD_DIR="$PREFIX/.termux/xData"
+    PROD_DIR="$HOME/.termux/xData"
 elif [ "$PROD_DIR" = "4" ]; then
     termux-setup-storage
-    PROD_DIR="$PREFIX/storage/shared/xData"
+    PROD_DIR="$HOME/storage/shared/xData"
 elif [ "$PROD_DIR" = "5" ]; then
     PROD_DIR="$HOME/$MASTER_USER"
 else 
@@ -238,7 +238,7 @@ update_configs() {
             if [ "$PACKAGE" = "mariadb" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.conf"
                 # insert into boot script
-                echo "mariadbd_safe --defaults-file=$CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log" >> "$BOOT_SCRIPT"
+                echo "mariadb-safe --defaults-file=$CONFIG_PATH &" >> "$BOOT_SCRIPT"
                 cat > "$CONFIG_PATH" <<EOF
 [mysqld]
 # Basic Settings
@@ -251,9 +251,9 @@ datadir = $DATA_PATH
 socket=$PREFIX/var/run/mysqld.sock
 
 # Logging
-log-error = $LOGS_PATH/$PACKAGE/error.log
+log-error = $LOGS_PATH/error.log
 slow-query-log = 1
-slow-query-log-file = $LOGS_PATH/$PACKAGE/slow.log
+slow-query-log-file = $LOGS_PATH/slow.log
 
 # Performance Tweaks
 innodb_buffer_pool_size = 256M
@@ -274,7 +274,7 @@ EOF
             if [ "$PACKAGE" = "sonicsearch" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.cfg"
                 # insert into boot script
-                echo "sonic --config $CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log " >> "$BOOT_SCRIPT"
+                echo "sonic --config $CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT" 
                 cat > "$CONFIG_PATH" <<EOF
 # Sonic
 # Fast, lightweight and schema-less search backend
@@ -334,12 +334,12 @@ EOF
             if [ "$PACKAGE" = "nginx" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.conf"
                 # insert into boot script
-                echo "nginx -c $CONFIG_PATH" >> "$BOOT_SCRIPT"
+                echo "nginx -c $CONFIG_PATH &" >> "$BOOT_SCRIPT"
                 cat > "$CONFIG_PATH" <<EOF
 # Nginx
 # nginx -c config.cfg
 worker_processes auto;
-error_log $LOGS_PATH/$PACKAGE/error.log;
+error_log $LOGS_PATH/error.log;
 # pid /var/run/nginx.pid;
 events {
     worker_connections 1024;
@@ -375,12 +375,12 @@ http {
     log_format      main  '\$remote_addr - \$remote_user [\$time_local] "\$request" '
                         '\$status \$body_bytes_sent "\$http_referer" '
                         '"\$http_user_agent" "\$http_x_forwarded_for"';
-    access_log      $LOGS_PATH/$PACKAGE/access.log  main;
+    access_log      $LOGS_PATH/access.log  main;
     sendfile        on;
     keepalive_timeout  65;
     upstream backend {
         ip_hash;
-        server 127.0.0.1:3001;
+        server 127.0.0.1:3000;
         server 127.0.0.1:3002;
     }
     server {
@@ -414,9 +414,10 @@ EOF
 
 # Network settings
 # bind 0.0.0.0 to listen from all anywhere
-
-port $PORT # Listen only on localhost (change for remote access)
-bind $BIND_IP  # Default Redis port
+bind $BIND_IP
+port $PORT 
+# Listen only on localhost (change for remote access)
+# Default Redis port
 
 # Disable protected mode for external access (be careful)
 protected-mode no
@@ -425,26 +426,31 @@ protected-mode no
 daemonize yes
 
 # Log file
-logfile "$LOGS_PATH/$PACKAGE.log"
+logfile $LOGS_PATH/$PACKAGE.log
 
 # Database settings
-save 900 1   # Save every 15 minutes if at least 1 change is made
-save 300 100  # Save every 5 minutes if 10 changes are made
-save 60 1500  # Save every 1 minute if 100 changes are made
+save 900 1   
+# Save every 15 minutes if at least 1 change is made
+save 300 100 
+# Save every 5 minutes if 10 changes are made
+save 60 1500  
+# Save every 1 minute if 100 changes are made
 
 # RDB file location
-dir "$DATA_PATH/$PACKAGE/"
+dir $DATA_PATH/ 
 
 # Max memory usage (set based on available RAM)
 maxmemory 100mb
-maxmemory-policy allkeys-lru  # Eviction policy
+maxmemory-policy allkeys-lru  
+# Eviction policy
 
 # Enable Append-Only Mode for durability
 appendonly yes
 appendfilename "appendonly.aof"
 
 # Enable password authentication (optional)
-#requirepass $MASTER_PASSWORD  # Change this to a strong password
+#requirepass $MASTER_PASSWORD  
+# Change this to a strong password
 
 # Enable Redis Cluster (optional)
 # cluster-enabled yes
@@ -455,41 +461,43 @@ EOF
             fi
 
             if [ "$PACKAGE" = "vector" ]; then
-                CONFIG_PATH="$CONF_DIR/$PACKAGE.toml"
+                CONFIG_PATH="$CONF_DIR/$PACKAGE.yaml"
                 # insert into boot script
-                echo "vector --config $CONFIG_PATH" >> "$BOOT_SCRIPT"
+                echo "vector --config $CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT &"
                 cat > "$CONFIG_PATH" <<EOF
 # Vector
 
 # Global configuration
-data_dir = "$DATA_PATH/$PACKAGE/"
+data_dir: "$DATA_PATH/"
 
 # Sources
-[sources.nest_logs]
-type = "socket"
-address = "0.0.0.0:9000"
-mode = "tcp"
+sources:
+  prod_logs:
+    type: socket
+    address: "$BIND_IP:$PORT"
+    mode: "tcp"
+    format: "json"
 
-# Transform: Parse log format
-[transforms.parse_logs]
-type = "remap"
-inputs = ["file_logs"]
-source = '''
-. = parse_regex!(.message, r'^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (?P<level>\w+) (?P<message>.*)$')
-'''
+sinks:
+  victoria_metrics:
+    inputs: ["prod_logs"]
+    type: http
+    uri: http://localhost:9428/insert/jsonline?_stream_fields=host,container_name&_msg_field=message&_time_field=timestamp
+    compression: gzip
+    encoding:
+      codec: json
+    framing:
+      method: newline_delimited
+    healthcheck:
+      enabled: false
 
-# Sinks
-[sinks.victoria_metrics]
-type = "prometheus_remote_write"
-inputs = ["system_metrics"]
-endpoint = "http://localhost:8428/api/v1/write"
-
-[sinks.zincsearch]
-type = "http"
-inputs = ["parse_logs"]
-uri = "http://localhost:4080/api/default/_bulk"
-method = "post"
-encoding.codec = "json"
+  zincsearch:
+    type: http
+    inputs: ["prod_logs"]  # Input from the parsing/enrichment transform
+    uri: "http://localhost:4080/api/default/_bulk"
+    method: "post"
+    encoding:
+      codec: "json"
 
 EOF
             fi
@@ -497,50 +505,17 @@ EOF
             if [ "$PACKAGE" = "victoria-metrics" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.yml"
                 # insert into boot script
-                echo "victoria-metrics -config.file=$CONFIG_PATH" >> "$BOOT_SCRIPT"
+                echo "victoria-metrics -storageDataPath $DATA_PATH -retentionPeriod=12 -maxConcurrentInserts=16 -search.maxQueryDuration=1m -httpListenAddr=:$PORT" >> "$BOOT_SCRIPT > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & "
 
                 cat > "$CONFIG_PATH" <<EOF
-# Victoria Metrics
-# Global settings
-storageDataPath: "$DATA_PATH/$PACKAGE/"
-retentionPeriod: "1y"
-
-# HTTP server settings
-httpListenAddr: ":8428"
-
-# Scrape settings
-promscrape:
-  enabled: true
-  config: |
-    global:
-      scrape_interval: 15s
-      evaluation_interval: 15s
-      
-    scrape_configs:
-      - job_name: "vector"
-        static_configs:
-          - targets: ["localhost:8686"]
-        
-      - job_name: "node"
-        static_configs:
-          - targets: ["localhost:9100"]
-# Search settings  
-search:
-  maxUniqueTimeseries: 1000000
-  maxSeries: 30000
-
-# victoria-metrics -config.file=~/victoriametrics.yml
-# # Remote write settings
-# remoteWrite:
-#   - url: "http://localhost:8428/api/v1/write"
-
+victoria-metrics -storageDataPath $DATA_PATH -retentionPeriod=12 -maxConcurrentInserts=16 -search.maxQueryDuration=1m -httpListenAddr=:$PORT
 EOF
             fi
             
             if [ "$PACKAGE" = "zincsearch" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.yaml"
                 # insert into boot script
-                echo "zincsearch --config $CONFIG_PATH" >> "$BOOT_SCRIPT"
+                echo "zincsearch --config $CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT & "
                 cat > "$CONFIG_PATH" <<EOF
 # ZincSearch
 # zincsearch --config config.yaml
@@ -549,7 +524,7 @@ server:
   address: "$BIND_IP"
 
 data:
-  path: "$DATA_PATH/$PACKAGE"
+  path: "$DATA_PATH/"
   storage_mode: "disk"
 
 auth:
@@ -584,6 +559,7 @@ update_configs
 
 
 chmod +x "$BOOT_SCRIPT"
+cp $BOOT_SCRIPT $PROD_DIR/boot.sh
 
 if [ "$RUN_SERVICES" = "y" ]; then
     termux-wake-lock
