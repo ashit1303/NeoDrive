@@ -94,6 +94,7 @@ mkdir -p "$PROD_DIR"
 # Create boot directory if it doesn't exist
 BOOT_DIR="$HOME/.termux/boot"
 mkdir -p "$BOOT_DIR"
+touch "$BOOT_DIR/boot.sh"
 BOOT_SCRIPT="$BOOT_DIR/boot.sh"
 
 # Create directory in $HOME/../prod
@@ -143,7 +144,7 @@ echo 'PS1="\[\e[1;32m\]\u@\h:\[\e[0m\]\[\e[1;34m\]$(if [[ \"\$PWD\" == \"\$HOME/
 # Download and extract the archive
 curl -L https://github.com/ashit1303/bash_scripts/releases/download/v1.0/aarch64.tar.xz -o aarch64.tar.xz
 tar -xf aarch64.tar.xz
-
+chmod +x aarch64/*
 # Move all extracted files to $PREFIX/bin
 mv -n aarch64/* $PREFIX/bin/
 
