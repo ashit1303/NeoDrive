@@ -22,11 +22,6 @@ print_message() {
 }
 
 
-# Pending tasks 
-# Hold liftbridge and fluent bit
-# 1. Create build file for every package for latest version - done 
-# 2. Create config for every package - done
-# 3. Download packages from repo and ru - done
 
 header() {
     COLOR="\e[1;35m" # Purple
@@ -58,7 +53,7 @@ EOF
 header
 
 
-read -r "Do you want to use root access? (y/n): " USE_ROOT_ACCESS
+read -rp "Do you want to use root access? (y/n): " USE_ROOT_ACCESS
 
 # Check if root access is available
 
@@ -618,6 +613,11 @@ else
 fi
 
 
+# Pending tasks 
+# Hold liftbridge and fluent bit
+# 1. Create build file for every package for latest version - done 
+# 2. Create config for every package - done
+# 3. Download packages from repo and ru - done
 # create  user 'care@127.0.0.1' identified by 'password'
 # create user for all domain
 # create user 'dummy@%' identified by 'password'
