@@ -66,7 +66,7 @@ fi
 
 read -rp "Enter master username(admin): " MASTER_USER
 read -rp "Enter master password(admin): " MASTER_PASSWORD
-read -rp "Where do you want to keep your data files 1) ~/xData 2) ~/../xData 3) ~/.termux/xData 4) ~/storage/shared/xData (1 or 2 or 3 or 4) " PROD_DIR 
+read -rp "Where do you want to keep your data files 1) ~/xData 2) ~/../xData 3) ~/.termux/xData 4) ~/storage/shared/xData  5) username (1 or 2 or 3 or 4 or 5) " PROD_DIR 
 read -rp "Do you want to run services on start? (y/n): " RUN_SERVICES
 
 # Later phase
@@ -83,6 +83,8 @@ elif [ "$PROD_DIR" = "3" ]; then
 elif [ "$PROD_DIR" = "4" ]; then
     termux-setup-storage
     PROD_DIR="$PREFIX/storage/shared/xData"
+elif [ "$PROD_DIR" = "5" ]; then
+    PROD_DIR="$HOME/$MASTER_USER"
 else 
     print_message "Invalid choice" fail
     exit 1
@@ -121,19 +123,19 @@ if [ "$USE_ROOT_ACCESS" = "y" ]; then
     if [ -x "$(command -v $package)" ]; then
         print_message "$package is already installed... Skipping..." skip
     else
-        if("$package" = "arp-scan"); then
+        if["$package" = "arp-scan"]; then
             if [ -x "$(command -v arp-scan)" ]; then
                 print_message "arp-scan is already installed and running... Skipping..." skip
                 continue
             fi
         fi
-        if("$package" = "iproute2"); then
+        if["$package" = "iproute2"]; then
             if [ -x "$(command -help ip)" ]; then
                 print_message "iproute2 is already installed and running... Skipping..." skip
                 continue
             fi
         fi
-        if("$package" = "nmap"); then
+        if["$package" = "nmap"]; then
             if [ -x "$(command nmap)" ]; then
                 print_message "nmap is already installed and running... Skipping..." skip
                 continue
@@ -157,25 +159,25 @@ for package in figlet curl tree wget nano iptables msmtp arp-scan openssh git ng
     if [ -x "$(command -v $package)" ]; then
         print_message "$package is already installed... Skipping..." skip
     else
-        if("$package" = "redis-server"); then
+        if["$package" = "redis-server"]; then
             if [ -x "$(command -v redis-cli)" ]; then
                 print_message "Redis is already installed and running... Skipping..." skip
                 continue
             fi
         fi
-        if("$package" = "iproute2"); then
-            if [ -x "$(command -help ip)" ]; then
+        if["$package" = "iproute2"]; then
+            if [ -x "$[command -help ip)" ]; then
                 print_message "iproute2 is already installed and running... Skipping..." skip
                 continue
             fi
         fi
-        if("$package" = "openssh"); then
+        if["$package" = "openssh"]; then
             if [ -x "$(command sshd)" ]; then
                 print_message "openssh is already installed and running... Skipping..." skip
                 continue
             fi
         fi
-        if("$package" = "nodejs"); then
+        if["$package" = "nodejs"]; then
             if [ -x "$(command -v node)" ]; then
                 print_message "nodejs is already installed and running... Skipping..." skip
                 continue
@@ -588,6 +590,7 @@ fi
     done < "$CONFIG_FILE"
 }
 
+update_configs
 
 
 chmod +x "$BOOT_SCRIPT"
