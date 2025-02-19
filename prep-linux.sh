@@ -124,7 +124,7 @@ sudo apt update -y && apt upgrade -y
 
 print_message "Installing necessary packages..." info
 # sudo apt install tsu figlet openssh git curl tree wget nano nodejs termux-services iptables iproute2 nmap nginx arp-scan mariadb -y
-for package in tsu figlet  curl tree wget nano termux-services iptables iproute2 nmap msmtp arp-scan openssh git nginx nodejs mariadb redis mongodb ; do
+for package in figlet  curl tree wget nano termux-services iptables iproute2 nmap postfix arp-scan openssh git nginx nodejs mariadb redis mongodb victoria-metrics  ; do
     if [ -x "$(command -v $package)" ]; then
         print_message "$package is already installed... Skipping..." skip
     else
@@ -138,19 +138,18 @@ for package in tsu figlet  curl tree wget nano termux-services iptables iproute2
     fi
 done
 
-echo "figlet -f slant 'Termux'" >> ../bash.bashrc 
-echo "PS1='\[\e[1;32m\]\u@\h:\[\e[0m\]\[\e[1;34m\]$(if [[ "$PWD" == "$HOME/" ]]; then echo "$HOME"; else echo "~/\W"; fi)\[\e[0m\]\$' " >> ../bash.bashrc
+echo "figlet -f slant '$MASTER_USER'" >> ../bash.bashrc 
 
-# Download and extract the archive
-curl -L https://github.com/ashit1303/bash_scripts/releases/download/v1.0/aarch64.tar.xz -o aarch64.tar.xz
-tar -xf aarch64.tar.xz
+print_message "Installing Vector..." info
+curl --proto '=https' --tlsv1.2 -sSfL https://sh.vector.dev | bash -s -- -y
 
-# Move all extracted files to $PREFIX/bin
-mv aarch64/* $PREFIX/bin/
+print_message "Installing Zinc Search..." info
 
-# Clean up
-rm -rf aarch64 aarch64.tar.xz
+wget https://github.com/zincsearch/zincsearch/releases/download/v0.4.10/zincsearch_0.4.10_Linux_x86_64.tar.gz
+tar -xvf zincsearch_0.4.10_Linux_x86_64.tar.gz
 
+sudo chmod +x zincsearch
+sudo mv zincsearch /usr/local/bin/
 
 CONFIG_FILE="$HOME/pkgs.ini"
 

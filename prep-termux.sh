@@ -149,7 +149,7 @@ curl -L https://github.com/ashit1303/bash_scripts/releases/download/v1.0/aarch64
 tar -xf aarch64.tar.xz
 
 # Move all extracted files to $PREFIX/bin
-mv aarch64/* $PREFIX/bin/
+mv -n aarch64/* $PREFIX/bin/
 
 # Clean up
 rm -rf aarch64 aarch64.tar.xz
