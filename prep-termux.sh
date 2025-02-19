@@ -109,6 +109,8 @@ mkdir -p "$LOGS_DIR"
 
 # Store all responses in a file inside the created directory
 RESPONSE_FILE="$PROD_DIR/termux-prep.conf"
+rm -f "$RESPONSE_FILE"
+touch "$RESPONSE_FILE"
 exec > >(tee -a "$RESPONSE_FILE") 2>&1
 
 print_message "Setting up termux..." info
@@ -270,7 +272,7 @@ symbolic-links = 0
 EOF
             fi
 
-            if [ "$PACKAGE" = "sonic" ]; then
+            if [ "$PACKAGE" = "sonicsearch" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.cfg"
                 # insert into boot script
                 echo "sonic --config $CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log " >> "$BOOT_SCRIPT"
@@ -333,7 +335,7 @@ EOF
             if [ "$PACKAGE" = "nginx" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.conf"
                 # insert into boot script
-                echo "nginx -c \$CONFIG_PATH" >> "$BOOT_SCRIPT"
+                echo "nginx -c $CONFIG_PATH" >> "$BOOT_SCRIPT"
                 cat > "$CONFIG_PATH" <<EOF
 # Nginx
 # nginx -c config.cfg
@@ -399,7 +401,7 @@ EOF
             if [ "$PACKAGE" = "redis" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.conf"
                 # insert into boot script
-                echo "redis-server \$CONFIG_PATH" >> "$BOOT_SCRIPT"
+                echo "redis-server $CONFIG_PATH" >> "$BOOT_SCRIPT"
                 cat > "$CONFIG_PATH" <<EOF
 # Redis
 # redis-server config.cfg
@@ -493,7 +495,7 @@ encoding.codec = "json"
 EOF
             fi
 
-            if [ "$PACKAGE" = "victoriametrics" ]; then
+            if [ "$PACKAGE" = "victoria-metrics" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.yml"
                 # insert into boot script
                 echo "victoria-metrics -config.file=$CONFIG_PATH" >> "$BOOT_SCRIPT"
