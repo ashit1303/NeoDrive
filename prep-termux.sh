@@ -66,7 +66,7 @@ fi
 
 read -rp "Enter master username(admin): " MASTER_USER
 read -rp "Enter master password(admin): " MASTER_PASSWORD
-read -rp "Where do you want to keep your data files 1) ~/xData 2) ~/../xData 3) ~/.termux/xData 4) ~/storage/shared/xData (1 or 2 or 3 or 4)" PROD_DIR 
+read -rp "Where do you want to keep your data files 1) ~/xData 2) ~/../xData 3) ~/.termux/xData 4) ~/storage/shared/xData (1 or 2 or 3 or 4) " PROD_DIR 
 read -rp "Do you want to run services on start? (y/n): " RUN_SERVICES
 
 # Later phase
@@ -118,13 +118,14 @@ pkg upgrade -y && pkg upgrade -y
 if [ "$USE_ROOT_ACCESS" = "y" ]; then
     pkg install root-repo -y
     pkg upgrade -y
+    pkg install mongodb -y
     pkg install tsu -y
 fi
 
 print_message "Installing necessary packages..." info
 
 # pkg install tsu figlet openssh git curl tree wget nano nodejs termux-services iptables iproute2 nmap nginx arp-scan mariadb -y
-for package in tsu figlet  curl tree wget nano termux-services iptables iproute2 nmap msmtp arp-scan openssh git nginx nodejs mariadb redis mongodb ; do
+for package in figlet  curl tree wget nano iptables iproute2 nmap msmtp arp-scan openssh git nginx nodejs mariadb redis ; do
     if [ -x "$(command -v $package)" ]; then
         print_message "$package is already installed... Skipping..." skip
     else
@@ -139,7 +140,7 @@ for package in tsu figlet  curl tree wget nano termux-services iptables iproute2
 done
 
 echo "figlet -f slant 'Termux'" >> ~/.bashrc
-echo 'PS1="\[\e[1;32m\]\u@\h:\[\e[0m\]\[\e[1;34m\]$(if [[ \"\$PWD\" == \"\$HOME/\" ]]; then echo \"\$HOME\"; else echo \"\~/\W\"; fi)\[\e[0m\]\$" ' >> ~/.bashrc
+echo PS1='\[\e[1;32m\]\u@\h:\[\e[0m\]\[\e[1;34m\]$(if [[ "$PWD" == "$HOME" ]]; then echo "~"; else echo "~${PWD#$HOME/}"; fi)\[\e[0m\]\$ ' >> ~/.bashrc
 
 # Download and extract the archive
 curl -L https://github.com/ashit1303/bash_scripts/releases/download/v1.0/aarch64.tar.xz -o aarch64.tar.xz
