@@ -15,9 +15,12 @@ import { RedisService } from './core/redis/redis.service';
 import { RedisConfigService } from './core/redis/redis.config';
 import { log } from 'console';
 import { SonicModule } from './core/sonic/sonic.module';
+import { TypeormModule } from './core/typeorm/typeorm.module';
+import { ShortenerModule } from './shortener/shortener.module';
 log('process.env.NODE_ENV', process.env.NODE_ENV);
 @Module({
   imports: [ 
+    TypeormModule,
     ConfigModule.forRoot({
       envFilePath: `.env-${process.env.NODE_ENV || 'dev'}`, // Dynamically loads .env file
       cache: false,  // Caches the .env file
@@ -25,7 +28,7 @@ log('process.env.NODE_ENV', process.env.NODE_ENV);
       // envFilePath: null,
       isGlobal: true,  // Makes ConfigService available globally
     }),
-    AuthModule, MailerModule, FileModule, UserModule,SonicModule
+    AuthModule, MailerModule, FileModule, UserModule,SonicModule, ShortenerModule
   ],
   controllers: [AppController, AuthController],
   providers: [AppService, AuthService, PrismaService, SonicService, JwtService, RedisService, RedisConfigService,],

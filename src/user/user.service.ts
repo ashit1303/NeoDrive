@@ -10,7 +10,7 @@ export class UserService {
     async getAllUsers(page: PageDto) {
         const skip = (page.page - 1) * page.pageSize; // Calculate the number of records to skip
 
-        return await this.prisma.vusers.findMany({
+        return await this.prisma.users.findMany({
             select: {
                 id: true,       
                 name: true,     

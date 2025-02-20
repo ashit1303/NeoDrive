@@ -14,7 +14,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     async validate(payload: any) { // Payload is the decoded JWT payload
-        const user = await this.prisma.vusers.findUnique(payload.sub); // Fetch the user from the database based on the payload (e.g., user ID)
+        const user = await this.prisma.users.findUnique(payload.id); // Fetch the user from the database based on the payload (e.g., user ID)
 
         if (!user) {
             return null; // Or throw an exception if you want to handle it differently

@@ -12,6 +12,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   app.useLogger(new VectorLogger(configService));
   // app.useGlobalPipes(new ValidationPipe());
+  app.enableCors();
   app.useGlobalFilters(new HttpExceptionFilter());
   log('printing env', configService.get('ENV'));
   if(configService.get('ENV') === 'dev'){

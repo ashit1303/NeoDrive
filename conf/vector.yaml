@@ -1,0 +1,32 @@
+sources:
+  prod_logs:
+    type: socket
+    address: "0.0.0.0:9000"
+    mode: "tcp"
+    format: "json"
+
+sinks:
+  victoria_metrics:
+    inputs: ["prod_logs"]
+    type: http
+    uri: http://localhost:9428/insert/jsonline?_stream_fields=host,container_name&_msg_field=message&_time_field=timestamp
+    compression: gzip
+    encoding:
+      codec: json
+    framing:
+      method: newline_delimited
+    healthcheck:
+      enabled: false
+
+  zincsearch:
+    type: http
+    inputs: ["prod_logs"]  # Input from the parsing/enrichment transform
+    uri: "http://localhost:4080/api/default/_bulk"
+    method: "post"
+    encoding:
+      codec: "json"
+
+
+
+#  expected one of `endpoint`, `default_namespace`, `buckets`, `quantiles`, `batch`, `request`, `tenant_id`, `tls`, `auth`, `aws`, `acknowledgements`, `compression`
+#  expected one of `avro`, `csv`, `gelf`, `json`, `logfmt`, `native`, `native_json`, `protobuf`, `raw_message`, `text`

@@ -17,14 +17,14 @@ export class FileService {
   }
   async uploadFile(file: Express.Multer.File) {
     const filePath = file.path;
-    const name = file.originalname;
-    const size = file.size;
+    const fileName = file.originalname;
+    const fileSize = file.size;
     // convert size in bytes 
     // store in bytes
     const shaHash = await this.generateSHA(filePath);
 
     // Check for duplicate files
-    const existingFile = await this.prisma.files.findUnique({ where: { sha:shaHash } });
+    const existingFile = await this.prisma.files.findUnique({ where: { file_sha:shaHash } });
     if (existingFile) {
       fs.unlinkSync(filePath); // Delete duplicate file
       throw new Error('Duplicate file detected');
@@ -32,7 +32,7 @@ export class FileService {
 
     // Save file metadata to database
     const newFile = await this.prisma.files.create({
-      data: { name, sha: shaHash,  filePath, size },
+      data: { file_name: fileName, file_sha: shaHash,  file_path: filePath, file_size: fileSize },
     });
 
     return { success:true, message: 'File uploaded successfully', data: shaHash };
