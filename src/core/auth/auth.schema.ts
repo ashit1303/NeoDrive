@@ -15,10 +15,3 @@ export class LoginRes {
     @ApiProperty({ description: 'User token' })
     token: string;
 }
-
-export class BasicResponse {
-    @ApiProperty({ description: 'Success' })
-    success: boolean;
-    @ApiProperty({ description: 'Message' })
-    message: string;
-}

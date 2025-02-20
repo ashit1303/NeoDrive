@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './core/auth/auth.module';
@@ -17,21 +17,31 @@ import { log } from 'console';
 import { SonicModule } from './core/sonic/sonic.module';
 import { TypeormModule } from './core/typeorm/typeorm.module';
 import { ShortenerModule } from './shortener/shortener.module';
+import { LoggerMiddleware } from './core/logger/logger.middleware';
+// import { VectorLogger } from './core/logger/vector.service';
+import { ZincLogger } from './core/logger/zinc.service';
 log('process.env.NODE_ENV', process.env.NODE_ENV);
 @Module({
-  imports: [ 
-    TypeormModule,
-    ConfigModule.forRoot({
-      envFilePath: `.env-${process.env.NODE_ENV || 'dev'}`, // Dynamically loads .env file
-      cache: false,  // Caches the .env file
-      ignoreEnvFile: true,  // Ignores the .env file
-      // envFilePath: null,
-      isGlobal: true,  // Makes ConfigService available globally
-    }),
-    AuthModule, MailerModule, FileModule, UserModule,SonicModule, ShortenerModule
+  imports: [ConfigModule.forRoot({
+    isGlobal: true,  // Makes ConfigService available globally
+    // envFilePath: `.env-${process.env.NODE_ENV || 'dev'}`, // Dynamically loads .env file
+    cache: false,  // Caches the .env file
+    ignoreEnvFile: true,  // Ignores the .env file
+    // envFilePath: null,
+  }),
+    TypeormModule, AuthModule, MailerModule, FileModule, UserModule, SonicModule, ShortenerModule
   ],
   controllers: [AppController, AuthController],
-  providers: [AppService, AuthService, PrismaService, SonicService, JwtService, RedisService, RedisConfigService,],
+  providers: [AppService, AuthService, PrismaService, SonicService, JwtService, RedisService, RedisConfigService, ConfigService,  ZincLogger],
 })
 
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    /**
+     * The LoggerMiddleware is applied globally (for all routes).
+     * The `forRoutes('*')` method applies the middleware to all routes.
+     * The `*` is a glob pattern that matches all routes.
+     */
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}

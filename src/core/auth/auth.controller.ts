@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, UsePipes } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { BasicResponse, LoginReq, loginReq, LoginRes } from './auth.schema';
+import { LoginReq, loginReq, LoginRes } from './auth.schema';
 import { JoiValidate } from "../joi/joi.service";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import joiToSwagger from "joi-to-swagger";
@@ -29,7 +29,7 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Register',description: 'Register user.' })
     @ApiBody({ schema: loginReqSwagger })
-    @ApiResponse({ status: 201, description: 'password changed successfully', type: BasicResponse })
+    @ApiResponse({ status: 201, description: 'password changed successfully',  })
     @ApiResponse({ status: 400, description: 'Bad Request. Validation failed',type: StandardErrorResponse })
     async register( @Body() data: LoginReq ) {
         return this.authService.passwordChange(data);

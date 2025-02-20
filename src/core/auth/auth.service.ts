@@ -18,9 +18,6 @@ export class AuthService {
 
     async login(cred: LoginReq) {
         const user = await this.typeorm.getRepository(Users).findOne({ where: { email: cred.email } });
-
-
-
         if (!user) {
             throw new NotFoundException('User not found');
         }

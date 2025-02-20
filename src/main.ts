@@ -5,14 +5,14 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { log } from 'console';
 import { HttpExceptionFilter } from './core/http-exception.filter';
 import { ConfigService } from '@nestjs/config';
-import { VectorLogger } from './core/logger/logger.service';
+import { ResponseInterceptor } from './core/response.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
-  app.useLogger(new VectorLogger(configService));
   // app.useGlobalPipes(new ValidationPipe());
   app.enableCors();
+  app.useGlobalInterceptors(new ResponseInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
   log('printing env', configService.get('ENV'));
   if(configService.get('ENV') === 'dev'){

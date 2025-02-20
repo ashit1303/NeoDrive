@@ -28,13 +28,11 @@ import { ApiProperty } from '@nestjs/swagger';
       const response = ctx.getResponse<Response>();
       const status = exception.getStatus();
       const err = exception.getResponse() as any; // Get the exception response object
-  
       const errorResponse: StandardErrorResponse = {
         success: false,
         message: err.message || exception.message || 'Internal Server Error', // Prioritize err.message, then exception.message, then default
         error: err.error || undefined, // Include detailed error if available
       };
-  
       response.status(status).json(errorResponse);
     }
   }

@@ -9,7 +9,7 @@ export interface ShortCode { // For type safety
   shortCode?:string;
 }
 
-export class LoginRes {
+export class ShortendLinkDTO {
     @ApiProperty({ description: 'Complete URL' })
     url: string;
 }
