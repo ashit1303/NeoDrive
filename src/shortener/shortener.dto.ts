@@ -1,15 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
-import * as Joi from 'joi';
-
-export const shortCode = Joi.object({
-  shortCode: Joi.string().length(11).regex(/^[a-zA-Z0-9]{3}-[a-zA-Z0-9]{3}-[a-zA-Z0-9]{3}$/).description('Short value').example('aaa-aaa-aaa'),
-});
-
-export interface ShortCode { // For type safety
-  shortCode?:string;
-}
-
+import { BaseResponse } from 'src/core/response.interceptor';
+import { IsString, IsUrl } from 'class-validator';
 export class ShortendLinkDTO {
     @ApiProperty({ description: 'Complete URL' })
     url: string;
+}
+export class ShortifyDTO {
+    @ApiProperty({ description: 'Short value' })
+    shortCode: string;
+    @IsUrl()
+    @ApiProperty({ description: 'Complete URL' })
+    originalUrl: string;
+}
+
+export class ShortenLinkSuccessResponse extends BaseResponse<ShortendLinkDTO> {
+  constructor(data: ShortendLinkDTO) {
+    super();
+    this.success = true;
+    this.data = data;
+  }
 }

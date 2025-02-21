@@ -238,7 +238,10 @@ update_configs() {
             if [ "$PACKAGE" = "mariadb" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.conf"
                 # insert into boot script
-                cp -r $PREFIX/var/lib/mysql/* $DATA_PATH
+                #Copy old data
+                # cp -r $PREFIX/var/lib/mysql/* $DATA_PATH
+                # start fresh
+                mysql_install_db --datadir=$DATA_PATH
                 echo "mariadbd-safe --datadir=$DATA_PATH --log-error=$LOGS_PATH/error.log &" >> "$BOOT_SCRIPT"
                 cat > "$CONFIG_PATH" <<EOF
 [mysqld]

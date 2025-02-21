@@ -1,12 +1,15 @@
-import * as Joi from 'joi';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNumber, Min } from 'class-validator';
 
-export const pageDto = Joi.object({
-    page: Joi.number().integer().min(1).required(),
-    pageSize: Joi.number().integer().min(1).max(100).required(),
-});
 
-export interface PageDto {
+export class PageDto {
+    @ApiProperty({ description: 'Page number' })
+    @IsNumber()
+    @Min(1)
     page: number;
+    @ApiProperty({ description: 'Page size' })
+    @IsNumber()
+    @Min(1)
     pageSize: number;
 }
 

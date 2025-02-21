@@ -6,13 +6,18 @@ import {
   ExecutionContext,
   CallHandler,
 } from '@nestjs/common';
+import { ApiProperty } from '@nestjs/swagger';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 export class BaseResponse<T> {
+  @ApiProperty({ description: 'HTTP status code' })
   statusCode: number;
+  @ApiProperty({ description: 'Request status' })
   success: boolean;
+  @ApiProperty({ description: 'Response message' })
   message: string;
+  @ApiProperty({ description: 'Payload'})
   data: T;
 }
 

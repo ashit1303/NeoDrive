@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-// import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { log } from 'console';
 import { HttpExceptionFilter } from './core/http-exception.filter';
@@ -10,12 +10,12 @@ import { ResponseInterceptor } from './core/response.interceptor';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
-  // app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe());
   app.enableCors();
   app.useGlobalInterceptors(new ResponseInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
   log('printing env', configService.get('ENV'));
-  if(configService.get('ENV') === 'dev'){
+  if(configService.get('ENV') === 'main'){
     log('Swagger is enabled');
     const swagConfig = new DocumentBuilder()
     .setTitle('API Documentation')

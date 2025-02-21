@@ -5,7 +5,7 @@ import { LoginReq } from "./auth.schema";
 import { JwtService } from '@nestjs/jwt';
 import { RedisService } from "../redis/redis.service";
 import { TypeormService } from "../typeorm/typeorm.service";
-import { Users } from "../../core/models/Users";
+import { Users } from "../models/Users";
 
 @Injectable()
 export class AuthService {

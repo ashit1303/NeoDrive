@@ -1,34 +1,33 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Res, UsePipes } from '@nestjs/common';
+import { Body, Controller, Get, Head, HttpCode, HttpStatus, Param, Post, Query, Res, UsePipes } from '@nestjs/common';
 import { Response } from 'express';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {  ApiBody, ApiNotFoundResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JoiValidate } from 'src/core/joi/joi.service';
-import { shortCode, ShortendLinkDTO } from './shortener.dto';
-import joiToSwagger from 'joi-to-swagger';
+import { ShortendLinkDTO, ShortenLinkSuccessResponse, ShortifyDTO } from './shortener.dto';
+// import joiToSwagger from 'joi-to-swagger';
 import { TypeormService } from 'src/core/typeorm/typeorm.service';
-import { ShortendLink } from 'src/core/models/ShortendLink';
 import { ShortenerService } from './shortener.service';
 import { BaseResponse } from 'src/core/response.interceptor';
 import { StandardErrorResponse } from 'src/core/http-exception.filter';
+import { HelperAndFormatter as Helper } from 'src/core/helper';
 
-const { swagger: shortCodeSwagger } = joiToSwagger(shortCode);
+// const { swagger: shortCodeSwagger } = joiToSwagger(shortCodeJoi);
 
 @ApiTags('Shortener')
-@Controller('s')
+@Controller('shortify')
 export class ShortenerController {
   constructor(private typeorm: TypeormService,
     private readonly shortenerService: ShortenerService,
   ) {}
-  // to create link shortener urls
-  // to redirect to original url
+
   @Get(':shortValue')
   @HttpCode(HttpStatus.OK)
-  @ApiParam({ schema: shortCodeSwagger, name: 'shortValue' })
-  @ApiOperation({ summary: 'Redirect to original URL', description: 'Redirect to original URL.' })
+  // @ApiParam({ schema : shortCodeSwagger, name: 'shortValue' })
+  @ApiParam({ name: 'shortValue', example: 'aaa-aaa-aaa' })
+  @ApiOperation({ summary: 'Redirect to original URL' })
   @ApiResponse({ status: 200, description: 'Redirecting to original URL', type: BaseResponse<ShortendLinkDTO>}, )
-  @UsePipes(new JoiValidate(shortCode))
-  async redirectToUrl(@Param('shortValue') shortValue: string) {
-    this.typeorm.getRepository(ShortendLink).findOne({ where: { shortCode: shortValue } });
-      return 'Redirecting to original URL';
+  async redirectToUrl(@Param('shortValue') shortValue: string, @Res() res: Response) {
+
+      return res.redirect(await this.shortenerService.fetchUrl(shortValue));
   }
 
   // @Get('default')
@@ -36,23 +35,42 @@ export class ShortenerController {
   //   return res.json();
   // }
 
-  @Post('is-available')
+  @Head('is-available')
   @HttpCode(HttpStatus.OK)
-  @ApiBody({ schema: shortCodeSwagger })
-  @ApiOperation({ summary: 'Check if short URL is available', description: 'Check if short URL is available.' })
-  @ApiResponse({ status: 200, description: 'Short URL is available', type: BaseResponse<ShortendLinkDTO> })
+  // @ApiBody({ schema: shortCodeSwagger })
+  @ApiQuery({ name: 'shortCode', example: 'aaa-aaa-aaa' })
+
+  @ApiOperation({ summary: 'Check if short URL is available'})
+  @ApiResponse({ status: 200, description: 'Short URL is available', type: ShortenLinkSuccessResponse })
   @ApiResponse({ status: 400, description: 'Error', type: StandardErrorResponse})
-
-  async isAvailable(@Body('shortCode')  { shortCode: shortCode}, ) {
-      const data = await this.shortenerService.fetchUrl(shortCode);
-      return data
+  async isAvailable(@Query('shortCode')  { shortCode: shortCode}, ) {
+      const data = await this.shortenerService.checkIfAvailable(shortCode);
+      return {isAvailable: data}
   }
 
+  @Post('short-it')
+  @ApiQuery({ name: 'shortCode', example: 'aaa-aaa-aaa' })
+  @ApiQuery({ name: 'originalUrl', example: 'https://www.google.com' })
+  @ApiOperation({ summary: 'Shorten URL'})
+  @ApiResponse({ status: 200})
+  @ApiResponse({ status: 400, description: 'Error', type: StandardErrorResponse})
+  @ApiNotFoundResponse({ description: 'Not Found', type: StandardErrorResponse})
+  async createShortUrl(@Query('shortCode') shortCode: string, @Query('originalUrl') originalUrl: string) {
+    const data = await this.shortenerService.createShortUrl(shortCode, originalUrl);
 
-
-  @Post()
-  async createShortUrl() {
-      return 'Shortened URL';
+    return {added: data}
   }
+
+  @Post('short-it-by-guest')
+  @ApiQuery({ name: 'originalUrl', example: 'https://www.google.com' })
+  @ApiOperation({ summary: 'Shorten URL by guest without short code'})
+  @ApiResponse({ status: 200})
+  @ApiResponse({ status: 400, description: 'Error', type: StandardErrorResponse})
+  @ApiNotFoundResponse({ description: 'Not Found', type: StandardErrorResponse})
+  async createShortUrlByGuest( @Query('originalUrl') originalUrl: string) {
+    const shortCode = Helper.generateShortCode();
+    const data = await this.shortenerService.createShortUrl(shortCode, originalUrl);
     
+    return {added: data, shortCode: shortCode};
+  }
 }

@@ -57,6 +57,7 @@ export class ZincLogger implements LoggerService {
   }
 
   error(message: string, trace?: string, context?: string | object) {
+    console.log('error', message, trace, context);
     this.sendLog('error', message, context, trace);
   }
 

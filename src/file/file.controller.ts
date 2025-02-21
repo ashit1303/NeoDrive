@@ -2,9 +2,10 @@ import { BadRequestException, Controller, FileTypeValidator, MaxFileSizeValidato
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileService } from './file.service';
 import { Express, query } from 'express';
-import { ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { StandardErrorResponse } from '../core/http-exception.filter';
 import { SonicService } from 'src/core/sonic/sonic.service';
+import { FileUploadDto } from './file.dto';
 
 
 @Controller('file')
@@ -12,9 +13,10 @@ export class FileController {
   constructor(private readonly fileService: FileService, private readonly sonicService: SonicService) {}
 
   @Post('upload')
-  @ApiOperation({ summary: 'Upload a file' })
+  @ApiOperation({ summary: 'File Upload' })
   @ApiConsumes('multipart/form-data')
-  @ApiResponse({ status: 201, description: 'File uploaded successfully', /* type: SuccessResponse<{ filename: string }> */ })
+  @ApiBody({ type: FileUploadDto })
+  @ApiResponse({ status: 201, description: 'File uploaded successfully', })
   @ApiResponse({ status: 400, description: 'Bad Request. Validation errors or file upload failed', type: StandardErrorResponse })
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(@UploadedFile(

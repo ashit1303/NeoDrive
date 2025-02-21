@@ -1,0 +1,209 @@
+// // import @nest/swagger
+// import { HttpStatus } from '@nestjs/common';
+// import { ApiBadGatewayResponse, ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse,  } from '@nestjs/swagger';
+
+// @ApiTags('Auth') // Swagger: Grouping of API
+// @Post('/login') // Swagger: Method Route
+// @HttpCode(HttpStatus.OK) //  
+// @ApiOperation({ summary: 'Login' /* method route  */,description: 'Login user.' /* Before Parameters */ })
+// @ApiBody({ schema: loginReqSwagger }) // Swagger: Request Body
+// @ApiConsumes('multipart/form-data') // Swagger: Request Body Content Type
+// @ApiResponse({ status: 201/*resonse code */, description: 'User logged in successfully'  /* response description */, type: LoginRes /*  schema display */  }) 
+// @ApiBadGatewayResponse({ status: 500, description: 'Internal Server Error', type: StandardErrorResponse }) // Swagger: Error Response
+// @ApiBearerAuth('JWT') // Swagger: Indicate bearer token authentication
+// @UsePipes(new JoiValidate(loginReq)) // Joi validation
+// @UseGuards(AuthGuard('jwt')) // Or just @UseGuards(AuthGuard()) 
+//  //file upload by swagger
+// @UseInterceptors(FileInterceptor('file')) // File Interceptor by Multer
+// @UsePipes(new JoiValidate(loginReq))
+
+
+
+import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport'; // Example auth guard
+
+@Controller('users')
+export class UserController {
+    constructor(private readonly userService: UserService) {}
+
+  @Get('profile')
+  @UseGuards(AuthGuard('jwt')) // Example authentication guard
+  async getProfile(@Req() req: RequestWithUser, @Res() res) {
+    try {
+      const user = await this.userService.getUser(req.user.id);
+      const response: BaseResponse<UserData> = {
+        success: true,
+        data: user,
+      };
+      return res.status(200).json(response);
+    } catch (error) {
+      const response: BaseResponse<null> = {
+        success: false,
+        message: error.message,
+      };
+      return res.status(500).json(response);
+    }
+  }
+
+  @Get('public-data')
+  async getPublicData(@Req() req: PublicRequest, @Res() res) {
+    const data = { message: 'This is public data' };
+    const response: BaseResponse<any> = { // or BaseResponse<typeof data> if you know the type
+      success: true,
+      data,
+    };
+    return res.status(200).json(response);
+  }
+}
+
+// Example data type returned by service
+interface UserData {
+  name: string;
+  email: string;
+}
+
+
+interface BaseResponse<T> {
+  success: boolean;
+  message?: string;
+  data?: T; // Data will be of type T
+}
+import { Request } from 'express';
+
+interface RequestWithUser extends Request {
+  user: { // Or however your user object is structured
+    id: number;
+    // ... other user properties
+  };
+}
+
+interface PublicRequest extends Request {} // For requests without authentication
+
+// Example usage in a controller:
+@Get('protected')
+getProtectedResource(@Req() req: RequestWithUser) {
+  console.log(req.user.id); // Access user information
+}
+
+@Get('public')
+getPublicResource(@Req() req: PublicRequest) {
+  // ... handle public request
+}
+
+[GIN-debug] GET    /debug/pprof/             --> github.com/gin-gonic/gin.WrapF.func1 (3 handlers)
+[GIN-debug] GET    /debug/pprof/cmdline      --> github.com/gin-gonic/gin.WrapF.func1 (3 handlers)
+[GIN-debug] GET    /debug/pprof/profile      --> github.com/gin-gonic/gin.WrapF.func1 (3 handlers)
+[GIN-debug] POST   /debug/pprof/symbol       --> github.com/gin-gonic/gin.WrapF.func1 (3 handlers)
+[GIN-debug] GET    /debug/pprof/symbol       --> github.com/gin-gonic/gin.WrapF.func1 (3 handlers)
+[GIN-debug] GET    /debug/pprof/trace        --> github.com/gin-gonic/gin.WrapF.func1 (3 handlers)
+[GIN-debug] GET    /debug/pprof/allocs       --> github.com/gin-gonic/gin.WrapH.func1 (3 handlers)
+[GIN-debug] GET    /debug/pprof/block        --> github.com/gin-gonic/gin.WrapH.func1 (3 handlers)
+[GIN-debug] GET    /debug/pprof/goroutine    --> github.com/gin-gonic/gin.WrapH.func1 (3 handlers)
+[GIN-debug] GET    /debug/pprof/heap         --> github.com/gin-gonic/gin.WrapH.func1 (3 handlers)
+[GIN-debug] GET    /debug/pprof/mutex        --> github.com/gin-gonic/gin.WrapH.func1 (3 handlers)
+[GIN-debug] GET    /debug/pprof/threadcreate --> github.com/gin-gonic/gin.WrapH.func1 (3 handlers)
+[GIN-debug] GET    /                         --> github.com/zincsearch/zincsearch/pkg/meta.GUI (4 handlers)
+[GIN-debug] GET    /version                  --> github.com/zincsearch/zincsearch/pkg/meta.GetVersion (4 handlers)
+[GIN-debug] GET    /healthz                  --> github.com/zincsearch/zincsearch/pkg/meta.GetHealthz (4 handlers)
+[GIN-debug] GET    /swagger                  --> github.com/zincsearch/zincsearch/pkg/routes.SetRoutes.func1 (4 handlers)
+[GIN-debug] GET    /swagger/*any             --> github.com/swaggo/gin-swagger.CustomWrapHandler.func1 (4 handlers)
+[GIN-debug] GET    /ui/*filepath             --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (5 handlers)
+[GIN-debug] HEAD   /ui/*filepath             --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (5 handlers)
+[GIN-debug] POST   /api/login                --> github.com/zincsearch/zincsearch/pkg/handlers/auth.Login (5 handlers)
+[GIN-debug] POST   /api/user                 --> github.com/zincsearch/zincsearch/pkg/handlers/auth.CreateUpdateUser (6 handlers)
+[GIN-debug] PUT    /api/user                 --> github.com/zincsearch/zincsearch/pkg/handlers/auth.CreateUpdateUser (6 handlers)
+[GIN-debug] DELETE /api/user/:id             --> github.com/zincsearch/zincsearch/pkg/handlers/auth.DeleteUser (6 handlers)
+[GIN-debug] GET    /api/user                 --> github.com/zincsearch/zincsearch/pkg/handlers/auth.ListUser (6 handlers)
+[GIN-debug] GET    /api/permissions          --> github.com/zincsearch/zincsearch/pkg/handlers/auth.ListPermissions (6 handlers)
+[GIN-debug] GET    /api/role                 --> github.com/zincsearch/zincsearch/pkg/handlers/auth.ListRole (6 handlers)
+[GIN-debug] POST   /api/role                 --> github.com/zincsearch/zincsearch/pkg/handlers/auth.CreateUpdateRole (6 handlers)
+[GIN-debug] PUT    /api/role                 --> github.com/zincsearch/zincsearch/pkg/handlers/auth.CreateUpdateRole (6 handlers)
+[GIN-debug] DELETE /api/role/:id             --> github.com/zincsearch/zincsearch/pkg/handlers/auth.DeleteRole (6 handlers)
+[GIN-debug] GET    /api/index                --> github.com/zincsearch/zincsearch/pkg/handlers/index.List (6 handlers)
+[GIN-debug] GET    /api/index_name           --> github.com/zincsearch/zincsearch/pkg/handlers/index.IndexNameList (6 handlers)
+[GIN-debug] POST   /api/index                --> github.com/zincsearch/zincsearch/pkg/handlers/index.Create (6 handlers)
+[GIN-debug] PUT    /api/index                --> github.com/zincsearch/zincsearch/pkg/handlers/index.Create (6 handlers)
+[GIN-debug] PUT    /api/index/:target        --> github.com/zincsearch/zincsearch/pkg/handlers/index.Create (6 handlers)
+[GIN-debug] DELETE /api/index/:target        --> github.com/zincsearch/zincsearch/pkg/handlers/index.Delete (6 handlers)
+[GIN-debug] GET    /api/index/:target        --> github.com/zincsearch/zincsearch/pkg/handlers/index.Get (6 handlers)
+[GIN-debug] HEAD   /api/index/:target        --> github.com/zincsearch/zincsearch/pkg/handlers/index.Exists (6 handlers)
+[GIN-debug] POST   /api/index/:target/refresh --> github.com/zincsearch/zincsearch/pkg/handlers/index.Refresh (6 handlers)
+[GIN-debug] GET    /api/:target/_mapping     --> github.com/zincsearch/zincsearch/pkg/handlers/index.GetMapping (6 handlers)
+[GIN-debug] PUT    /api/:target/_mapping     --> github.com/zincsearch/zincsearch/pkg/handlers/index.SetMapping (6 handlers)
+[GIN-debug] GET    /api/:target/_settings    --> github.com/zincsearch/zincsearch/pkg/handlers/index.GetSettings (6 handlers)
+[GIN-debug] PUT    /api/:target/_settings    --> github.com/zincsearch/zincsearch/pkg/handlers/index.SetSettings (6 handlers)
+[GIN-debug] POST   /api/_analyze             --> github.com/zincsearch/zincsearch/pkg/handlers/index.Analyze (6 handlers)
+[GIN-debug] POST   /api/:target/_analyze     --> github.com/zincsearch/zincsearch/pkg/handlers/index.Analyze (6 handlers)
+[GIN-debug] POST   /api/:target/_search      --> github.com/zincsearch/zincsearch/pkg/handlers/search.SearchV1 (6 handlers)
+[GIN-debug] POST   /api/_bulk                --> github.com/zincsearch/zincsearch/pkg/handlers/document.Bulk (6 handlers)
+[GIN-debug] POST   /api/:target/_bulk        --> github.com/zincsearch/zincsearch/pkg/handlers/document.Bulk (6 handlers)
+[GIN-debug] POST   /api/:target/_multi       --> github.com/zincsearch/zincsearch/pkg/handlers/document.Multi (6 handlers)
+[GIN-debug] POST   /api/_bulkv2              --> github.com/zincsearch/zincsearch/pkg/handlers/document.Bulkv2 (6 handlers)
+[GIN-debug] POST   /api/:target/_bulkv2      --> github.com/zincsearch/zincsearch/pkg/handlers/document.Bulkv2 (6 handlers)
+[GIN-debug] POST   /api/:target/_doc         --> github.com/zincsearch/zincsearch/pkg/handlers/document.CreateUpdate (6 handlers)
+[GIN-debug] PUT    /api/:target/_doc         --> github.com/zincsearch/zincsearch/pkg/handlers/document.CreateUpdate (6 handlers)
+[GIN-debug] PUT    /api/:target/_doc/:id     --> github.com/zincsearch/zincsearch/pkg/handlers/document.CreateUpdate (6 handlers)
+[GIN-debug] HEAD   /api/:target/_doc/:id     --> github.com/zincsearch/zincsearch/pkg/handlers/document.Get (6 handlers)
+[GIN-debug] GET    /api/:target/_doc/:id     --> github.com/zincsearch/zincsearch/pkg/handlers/document.Get (6 handlers)
+[GIN-debug] POST   /api/:target/_update/:id  --> github.com/zincsearch/zincsearch/pkg/handlers/document.Update (6 handlers)
+[GIN-debug] DELETE /api/:target/_doc/:id     --> github.com/zincsearch/zincsearch/pkg/handlers/document.Delete (6 handlers)
+[GIN-debug] GET    /es/                      --> github.com/zincsearch/zincsearch/pkg/routes.SetRoutes.func3 (6 handlers)
+[GIN-debug] HEAD   /es/                      --> github.com/zincsearch/zincsearch/pkg/routes.SetRoutes.func4 (6 handlers)
+[GIN-debug] GET    /es/_license              --> github.com/zincsearch/zincsearch/pkg/routes.SetRoutes.func5 (6 handlers)
+[GIN-debug] GET    /es/_xpack                --> github.com/zincsearch/zincsearch/pkg/routes.SetRoutes.func6 (6 handlers)
+[GIN-debug] POST   /es/_search               --> github.com/zincsearch/zincsearch/pkg/handlers/search.SearchDSL (8 handlers)
+[GIN-debug] POST   /es/_msearch              --> github.com/zincsearch/zincsearch/pkg/handlers/search.MultipleSearch (8 handlers)
+[GIN-debug] POST   /es/:target/_search       --> github.com/zincsearch/zincsearch/pkg/handlers/search.SearchDSL (8 handlers)
+[GIN-debug] POST   /es/:target/_msearch      --> github.com/zincsearch/zincsearch/pkg/handlers/search.MultipleSearch (8 handlers)
+[GIN-debug] POST   /es/:target/_delete_by_query --> github.com/zincsearch/zincsearch/pkg/handlers/search.DeleteByQuery (7 handlers)
+[GIN-debug] GET    /es/_index_template       --> github.com/zincsearch/zincsearch/pkg/handlers/index.ListTemplate (7 handlers)
+[GIN-debug] POST   /es/_index_template       --> github.com/zincsearch/zincsearch/pkg/handlers/index.CreateTemplate (7 handlers)
+[GIN-debug] PUT    /es/_index_template/:target --> github.com/zincsearch/zincsearch/pkg/handlers/index.CreateTemplate (7 handlers)
+[GIN-debug] GET    /es/_index_template/:target --> github.com/zincsearch/zincsearch/pkg/handlers/index.GetTemplate (7 handlers)
+[GIN-debug] HEAD   /es/_index_template/:target --> github.com/zincsearch/zincsearch/pkg/handlers/index.GetTemplate (7 handlers)
+[GIN-debug] DELETE /es/_index_template/:target --> github.com/zincsearch/zincsearch/pkg/handlers/index.DeleteTemplate (7 handlers)
+[GIN-debug] PUT    /es/_data_stream/:target  --> github.com/zincsearch/zincsearch/pkg/meta/elastic.PutDataStream (7 handlers)
+[GIN-debug] GET    /es/_data_stream/:target  --> github.com/zincsearch/zincsearch/pkg/meta/elastic.GetDataStream (7 handlers)
+[GIN-debug] HEAD   /es/_data_stream/:target  --> github.com/zincsearch/zincsearch/pkg/meta/elastic.GetDataStream (7 handlers)
+[GIN-debug] PUT    /es/:target               --> github.com/zincsearch/zincsearch/pkg/handlers/index.CreateES (7 handlers)
+[GIN-debug] HEAD   /es/:target               --> github.com/zincsearch/zincsearch/pkg/handlers/index.Exists (7 handlers)
+[GIN-debug] GET    /es/:target/_mapping      --> github.com/zincsearch/zincsearch/pkg/handlers/index.GetESMapping (7 handlers)
+[GIN-debug] PUT    /es/:target/_mapping      --> github.com/zincsearch/zincsearch/pkg/handlers/index.SetMapping (7 handlers)
+[GIN-debug] GET    /es/:target/_settings     --> github.com/zincsearch/zincsearch/pkg/handlers/index.GetSettings (7 handlers)
+[GIN-debug] PUT    /es/:target/_settings     --> github.com/zincsearch/zincsearch/pkg/handlers/index.SetSettings (7 handlers)
+[GIN-debug] POST   /es/_analyze              --> github.com/zincsearch/zincsearch/pkg/handlers/index.Analyze (7 handlers)
+[GIN-debug] POST   /es/:target/_analyze      --> github.com/zincsearch/zincsearch/pkg/handlers/index.Analyze (7 handlers)
+[GIN-debug] POST   /es/_aliases              --> github.com/zincsearch/zincsearch/pkg/handlers/index.AddOrRemoveESAlias (7 handlers)
+[GIN-debug] GET    /es/_alias                --> github.com/zincsearch/zincsearch/pkg/handlers/index.GetESAliases (7 handlers)
+[GIN-debug] GET    /es/:target/_alias        --> github.com/zincsearch/zincsearch/pkg/handlers/index.GetESAliases (7 handlers)
+[GIN-debug] GET    /es/_alias/:target_alias  --> github.com/zincsearch/zincsearch/pkg/handlers/index.GetESAliases (7 handlers)
+[GIN-debug] POST   /es/_bulk                 --> github.com/zincsearch/zincsearch/pkg/handlers/document.ESBulk (7 handlers)
+[GIN-debug] POST   /es/:target/_bulk         --> github.com/zincsearch/zincsearch/pkg/handlers/document.ESBulk (7 handlers)
+[GIN-debug] PUT    /es/:target/_bulk         --> github.com/zincsearch/zincsearch/pkg/handlers/document.ESBulk (7 handlers)
+[GIN-debug] POST   /es/:target/_refresh      --> github.com/zincsearch/zincsearch/pkg/handlers/index.Refresh (6 handlers)
+[GIN-debug] POST   /es/:target/_doc          --> github.com/zincsearch/zincsearch/pkg/handlers/document.CreateUpdate (7 handlers)
+[GIN-debug] PUT    /es/:target/_doc/:id      --> github.com/zincsearch/zincsearch/pkg/handlers/document.CreateUpdate (7 handlers)
+[GIN-debug] PUT    /es/:target/_create/:id   --> github.com/zincsearch/zincsearch/pkg/handlers/document.CreateUpdate (7 handlers)
+[GIN-debug] POST   /es/:target/_create/:id   --> github.com/zincsearch/zincsearch/pkg/handlers/document.CreateUpdate (7 handlers)
+[GIN-debug] POST   /es/:target/_update/:id   --> github.com/zincsearch/zincsearch/pkg/handlers/document.Update (7 handlers)
+[GIN-debug] DELETE /es/:target/_doc/:id      --> github.com/zincsearch/zincsearch/pkg/handlers/document.Delete (7 handlers)
+
+{
+  "_index": "logs",
+  "_type": "_doc",
+  "_id": "2fOlBSIBqRG",
+  "_score": 2,
+  "@timestamp": "2025-02-20T18:52:16.215324928Z",
+  "_source": {
+    "@timestamp": "2025-02-20T18:52:16.215324928Z",
+    "level": "info",
+    "message": "HTTP Request",
+    "method": "GET",
+    "remoteAddress": "::1",
+    "responseTime": "3ms",
+    "status": 304,
+    "timestamp": "2025-02-20T18:52:16.382Z",
+    "url": "/",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
+  }
+}

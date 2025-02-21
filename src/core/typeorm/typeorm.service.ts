@@ -8,18 +8,25 @@ export class TypeormService extends DataSource implements OnApplicationBootstrap
     constructor(config: ConfigService) {
         super({
         type: 'mysql',
-        url: config.get<string>('MYSQL_URL'),
-        // host: 'localhost',
-        // port: 3306, 
-        // username: 'root',
-        // password: 'root',
-        // database: 'care',
+        // url: config.get<string>('MYSQL_URL'),
+        host: 'localhost',
+        port: 3306, 
+        username: 'admin',
+        password: 'password',
+        database: 'neodrive',
         entities: [
-            __dirname + '/../**/*.entity{.ts,.js}',
-            __dirname + '/../**/*.model{.ts,.js}',
+            // __dirname + '/../**/*.entity{.ts,.js}',
+            // __dirname + '/../**/*/.model{.ts,.js}',
+            `${__dirname}/../models/*.{j,t}s`
         ],
+        // entities: [], 
         synchronize: true,
         });
+        console.log(
+            // __dirname + '/../**/*.entity{.ts,.js}',
+            // __dirname + '/../**/*/.model{.ts,.js}',
+            `${__dirname}/../core/models/*.{j,t}s`
+        )
     }
     async onApplicationBootstrap() {
       try {
