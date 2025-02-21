@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { TypeormService } from 'src/core/typeorm/typeorm.service';
-import { ShortendLinkDTO } from './shortener.dto';
+// import { ShortendLinkDTO } from './shortener.dto';
 import { ShortendLink } from 'src/core/models/ShortendLink';
 import { ZincLogger } from 'src/core/logger/zinc.service';
 
@@ -13,7 +13,7 @@ export class ShortenerService {
   async fetchUrl(shortValue: string): Promise<string> {
     let resp = await this.typeorm.getRepository(ShortendLink).findOne({ where: { shortCode: shortValue } });
     // return { resp.originalUrl};
-    return resp.originalUrl
+    return resp.originalUrl;
   }
   async checkIfAvailable(shortValue: string): Promise<boolean> {
     try {

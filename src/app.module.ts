@@ -20,6 +20,7 @@ import { ShortenerModule } from './shortener/shortener.module';
 import { LoggerMiddleware } from './core/logger/logger.middleware';
 // import { VectorLogger } from './core/logger/vector.service';
 import { ZincLogger } from './core/logger/zinc.service';
+// import { ResponseModifierMiddleware } from './core/response.interceptor';
 log('process.env.NODE_ENV', process.env.NODE_ENV);
 @Module({
   imports: [ConfigModule.forRoot({
@@ -36,12 +37,13 @@ log('process.env.NODE_ENV', process.env.NODE_ENV);
 })
 
 export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
+  configure(consumer: MiddlewareConsumer ) {
     /**
      * The LoggerMiddleware is applied globally (for all routes).
      * The `forRoutes('*')` method applies the middleware to all routes.
      * The `*` is a glob pattern that matches all routes.
      */
+    // consumer.apply(ResponseModifierMiddleware).forRoutes('*')
     consumer.apply(LoggerMiddleware).forRoutes('*');
   }
 }

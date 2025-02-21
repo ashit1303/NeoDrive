@@ -2,7 +2,7 @@ import { Controller, Get, UsePipes } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JoiValidate } from '../core/joi/joi.service';
-import { PageDto } from './user.dto';
+import { PageDto } from './dto';
 import joiToSwagger from 'joi-to-swagger';
 import { StandardErrorResponse } from '../core/http-exception.filter';
 

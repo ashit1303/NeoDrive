@@ -5,7 +5,7 @@ import { Express, query } from 'express';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { StandardErrorResponse } from '../core/http-exception.filter';
 import { SonicService } from 'src/core/sonic/sonic.service';
-import { FileUploadDto } from './file.dto';
+import { FileUploadDto } from './dto';
 
 
 @Controller('file')
