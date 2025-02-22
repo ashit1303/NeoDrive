@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, Req, UseGuards, UsePipes } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { LoginReq,  LoginRes } from './auth.schema';
+import { LoginReqDTO,  LoginResDTO } from './auth.schema';
 import { JoiValidate } from "../joi/joi.service";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 // import joiToSwagger from "joi-to-swagger";
@@ -13,26 +13,40 @@ import { AuthGuard } from "@nestjs/passport";
 @Controller('auth')
 export class AuthController {
     constructor(private readonly authService: AuthService){}
+        
+    // Register a user
+    @Post('register')
+    @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ summary: 'Register' })
+    @ApiBody({ type :LoginReqDTO })
+    @ApiResponse({ status: 201, description: 'User registered successfully',  })
+    @ApiResponse({ status: 400, description: 'Bad Request. Validation failed',type: StandardErrorResponse })
+    async registerUser( @Body() dto ) {
+        const data = await this.authService.register(dto);
+        return data;
+    }
 
     @Post('login')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Login' })
-    @ApiBody({ type: LoginReq })
-    @ApiResponse({ status: 201, description: 'User logged in successfully', type: LoginRes })
+    @ApiBody({ type: LoginReqDTO })
+    @ApiResponse({ status: 201, description: 'User logged in successfully', type: LoginResDTO })
     @ApiResponse({ status: 400, description: 'Bad Request. Validation failed',type: StandardErrorResponse })
     // @UsePipes(t)
-    async login( @Req() body: LoginReq )   {
-        return await this.authService.login(body);
+    async login( @Body() body: LoginReqDTO )   {
+        const data = await this.authService.login(body);
+        return {token : data}
     } 
 
     @Post('password-reset')
     @HttpCode(HttpStatus.OK)
-    @ApiOperation({ summary: 'Register' })
-    @ApiBody({ type :LoginReq })
-    @ApiResponse({ status: 201, description: 'password changed successfully',  })
+    @ApiOperation({ summary: 'Password Reset' })
+    @ApiBody({ type :LoginReqDTO })
+    @ApiResponse({ status: 201, description: 'Password changed successfully',  })
     @ApiResponse({ status: 400, description: 'Bad Request. Validation failed',type: StandardErrorResponse })
-    async register( @Body() body: LoginReq ) {
-        return this.authService.passwordChange(body);
+    async passwordChange( @Body() body: LoginReqDTO ) {
+        const data = await this.authService.passwordChange(body);
+        return data;
     }
 
     @Post('verify-otp')

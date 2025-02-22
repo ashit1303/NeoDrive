@@ -1,13 +1,15 @@
-import {  Controller, Get, Head, HttpCode, HttpStatus, Param, Post, Query, Redirect, Res } from '@nestjs/common';
+import {  Controller, Get, Head, HttpCode, HttpStatus, Param, Post, Query, Redirect, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import {  ApiNotFoundResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 // import { JoiValidate } from 'src/core/joi/joi.service';
-import { ShortendLinkDTO, ShortenLinkSuccessResponse, ShortifyDTO } from './shortener.dto';
+import { ShortendLinkDTO, ShortenLinkSuccessResponse, ShortifyDTO } from './dto/';
 // import joiToSwagger from 'joi-to-swagger';
 import { ShortenerService } from './shortener.service';
 import { BaseResponse } from 'src/core/response.interceptor';
 import { StandardErrorResponse } from 'src/core/http-exception.filter';
 import { HelperAndFormatter as Helper } from 'src/core/helper';
+// import { AuthGuard } from '@nestjs/passport';
+import { JwtGaurd } from 'src/core/auth/gaurd';
 
 // const { swagger: shortCodeSwagger } = joiToSwagger(shortCodeJoi);
 
@@ -32,7 +34,7 @@ export class ShortenerController {
   // @ApiBody({ schema: shortCodeSwagger })
   @ApiQuery({ name: 'shortCode', example: 'aaa-aaa-aaa' })
   @ApiOperation({ summary: 'Check if short URL is available'})
-  @ApiResponse({ status: 200, description: 'Short URL is available', type: ShortenLinkSuccessResponse })
+  @ApiResponse({ status: 200, description: 'Short URL is available', type: BaseResponse  })
   @ApiResponse({ status: 400, description: 'Error', type: StandardErrorResponse})
   async isAvailable(@Query('shortCode') shortCode: string, @Res() res:Response ) {
       const data = await this.shortenerService.checkIfAvailable(shortCode);
@@ -43,7 +45,9 @@ export class ShortenerController {
   @ApiQuery({ name: 'shortCode', example: 'aaa-aaa-aaa' })
   @ApiQuery({ name: 'originalUrl', example: 'https://www.google.com' })
   @ApiOperation({ summary: 'Shorten URL'})
-  @ApiResponse({ status: 200})
+  @ApiResponse({ status: 200, type: BaseResponse})
+  @UseGuards(JwtGaurd)
+  // @UseGuards(AuthGuard('jwt'))
   @ApiResponse({ status: 400, description: 'Error', type: StandardErrorResponse})
   @ApiNotFoundResponse({ description: 'Not Found', type: StandardErrorResponse})
   async createShortUrl(@Query('shortCode') shortCode: string, @Query('originalUrl') originalUrl: string) {

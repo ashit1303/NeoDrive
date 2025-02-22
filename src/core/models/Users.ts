@@ -3,7 +3,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 @Entity("users", { schema: "neodrive" })
 export class Users {
   @PrimaryGeneratedColumn({ type: "bigint", name: "id", unsigned: true })
-  public id: string;
+  public id: number;
 
   @Column("varchar", { name: "email", length: 63 })
   public email: string;

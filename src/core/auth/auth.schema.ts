@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, Min } from 'class-validator';
+import { IsEmail, Matches, Min, MinLength } from 'class-validator';
 import * as Joi from 'joi';
 
 // export const loginReq = Joi.object({
@@ -7,16 +7,44 @@ import * as Joi from 'joi';
 //     password: Joi.string().required().description('User password').example('pass')
 // }).or('email', 'mobile');
 
-export class LoginReq { // For type safety
+export class LoginReqDTO { // For type safety
     @ApiProperty({ description: 'Email'})
     @IsEmail()
+    @Matches(/@(?:gmail\.com|yahoo\.com|outlook\.com|hotmail\.com|aol\.com|msn\.com)$/, { message: 'Only popular email domains are allowed (e.g., @gmail.com, @yahoo.com)' }) // Custom regex for popular domains
     email:string;
+
     @ApiProperty({description: 'Pass'})
-    @Min(6)
+    // @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/, { message: 'New password must contain at least one lowercase letter, one uppercase letter, one number, and one special character' }) // Example regex
+    @MinLength(6)
     password: string;
 }
 
-export class LoginRes {
+export class LoginResDTO {
     @ApiProperty({ description: 'User token' })
     token: string;
 }
+
+export class authPayloadDTO{
+    id : number;
+    username:string;
+    email:string;
+    
+}
+
+// export class ChangePasswordReqDto {
+//     @IsNotEmpty({ message: 'Old password is required' })
+//     @IsString({ message: 'Old password must be a string' })
+//     oldPassword!: string;
+  
+//     @IsNotEmpty({ message: 'New password is required' })
+//     @IsString({ message: 'New password must be a string' })
+//     @MinLength(6, { message: 'New password must be at least 6 characters' }) // Changed to 6
+//     @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/, { message: 'New password must contain at least one lowercase letter, one uppercase letter, one number, and one special character' }) // Example regex
+//     newPassword!: string;
+  
+//     @IsNotEmpty({ message: 'Confirm password is required' })
+//     @IsString({ message: 'Confirm password must be a string' })
+//     confirmPassword!: string;
+  
+//     // ... other properties
+//   }
