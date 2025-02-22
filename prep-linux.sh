@@ -22,12 +22,6 @@ print_message() {
 }
 
 
-# Pending tasks 
-# Hold liftbridge and fluent bit
-# 1. Create build file for every package for latest version - done 
-# 2. Create config for every package - done
-# 3. Download packages from repo and ru - done
-
 header() {
     COLOR="\e[1;35m" # Purple
     RESET="\e[0m"     # Reset color
@@ -60,7 +54,7 @@ header
 
 read -rp "Enter master username(admin): " MASTER_USER
 read -rp "Enter master password(admin): " MASTER_PASSWORD
-read -rp "Where do you want to keep your data files 1) ~/xData 2) ~/../xData 3) ~/.termux/xData 4) ~/storage/shared/xData (1 or 2 or 3 or 4)" PROD_DIR 
+read -rp "Where do you want to keep your data files 1) ~/xData 2) ~/../xData (1 or 2 )" PROD_DIR 
 read -rp "Do you want to run services on start? (y/n): " RUN_SERVICES
 
 # Later phase
@@ -71,12 +65,12 @@ read -rp "Do you want to run services on start? (y/n): " RUN_SERVICES
 if [ "$PROD_DIR" = "1" ]; then
     PROD_DIR="$HOME/xData"
 elif [ "$PROD_DIR" = "2" ]; then
-    PROD_DIR="$PREFIX/../xData"
+    PROD_DIR="$HOME/../xData"
 elif [ "$PROD_DIR" = "3" ]; then
-    PROD_DIR="$PREFIX/.termux/xData"
+    PROD_DIR="$HOME/.termux/xData"
 elif [ "$PROD_DIR" = "4" ]; then
     termux-setup-storage
-    PROD_DIR="$PREFIX/storage/shared/xData"
+    PROD_DIR="$HOME/storage/shared/xData"
 else 
     print_message "Invalid choice" fail
     exit 1
@@ -86,7 +80,7 @@ fi
 mkdir -p "$PROD_DIR"
 
 # Create boot directory if it doesn't exist
-BOOT_DIR="$HOME/.termux/boot"
+BOOT_DIR="$PROD_DIR/initiate"
 mkdir -p "$BOOT_DIR"
 BOOT_SCRIPT="$BOOT_DIR/boot.sh"
 
@@ -99,7 +93,7 @@ mkdir -p "$CONF_DIR"
 mkdir -p "$LOGS_DIR"
 
 # Store all responses in a file inside the created directory
-RESPONSE_FILE="$PROD_DIR/termux-prep.conf"
+RESPONSE_FILE="$BOOT_DIR/initiate.logs"
 exec > >(tee -a "$RESPONSE_FILE") 2>&1
 
 print_message "Setting up termux..." info
@@ -107,24 +101,56 @@ print_message "Setting up termux..." info
 print_message "Updating and upgrading packages..." info
 sudo apt update -y && apt upgrade -y
 
+echo "figlet -f slant '$MASTER_USER'" >> ~/.bashrc 
 
 print_message "Installing necessary packages..." info
 # sudo apt install tsu figlet openssh git curl tree wget nano nodejs termux-services iptables iproute2 nmap nginx arp-scan mariadb -y
-for package in figlet  curl tree wget nano termux-services iptables iproute2 nmap postfix arp-scan openssh git nginx nodejs mariadb redis mongodb victoria-metrics  ; do
-    if [ -x "$(command -v $package)" ]; then
+for package in figlet curl tree wget nano termux-services iptables iproute2 nmap postfix arp-scan openssh git nginx nodejs mariadb redis mongodb victoria-metrics  ; do
+    if command -v "$package" &>/dev/null; then
         print_message "$package is already installed... Skipping..." skip
-    else
-        print_message "$package is not installed, installing..." info
-        sudo apt install $package -y
-        if [ -x "$(command -v $package)" ]; then
-            print_message "$package installed successfully!" success
-        else
-            print_message "Failed to install $package" fail
+        continue
+    fi
+    if [ "$package" = "redis" ]; then
+        if command -v redis-cli &>/dev/null; then
+            print_message "Redis is already installed and running... Skipping..." skip
+            continue
         fi
+    elif [ "$package" = "openssh" ]; then
+        if command -v sshd &>/dev/null; then
+            print_message "OpenSSH is already installed and running... Skipping..." skip
+            continue
+        fi
+    elif [ "$package" = "nodejs" ]; then
+        if command -v node &>/dev/null; then
+            print_message "Node.js is already installed and running... Skipping..." skip
+            continue
+        fi
+    elif [ "$package" = "iproute2" ]; then
+        if command -v ip &>/dev/null; then
+            print_message "iproute2 is already installed and running... Skipping..." skip
+            continue
+        fi
+    elif [ "$package" = "nmap" ]; then
+        if command -v nmap &>/dev/null; then
+            print_message "Nmap is already installed and running... Skipping..." skip
+            continue
+        fi
+    fi
+
+    print_message "$package is not installed, installing..." info
+    if sudo apt install "$package" -y; then
+        print_message "$package installed successfully!" success
+    else
+        print_message "Failed to install $package" fail
     fi
 done
 
-echo "figlet -f slant '$MASTER_USER'" >> ../bash.bashrc 
+if [ "$package" = "nmap" ]; then
+        if command -v nmap &>/dev/null; then
+            print_message "Nmap is already installed and running... Skipping..." skip
+            continue
+        fi
+fi
 
 print_message "Installing Vector..." info
 curl --proto '=https' --tlsv1.2 -sSfL https://sh.vector.dev | bash -s -- -y
@@ -157,15 +183,16 @@ read_config() {
 print_message "Creating startup script..." info
 # Function to update configs
 update_configs() {
-    while IFS= read -r line; do
-        if [[ $line =~ ^\[([a-zA-Z0-9_-]+)\]$ ]]; then
-            PACKAGE="${BASH_REMATCH[1]}"
+    PACKAGES=$(awk -F '[][]' '/\[.*\]/ {print $2}' "$CONFIG_FILE")
 
+        for PACKAGE in $PACKAGES; do
+            PORT=$(read_config "$PACKAGE" "port")
+            BIND_IP=$(read_config "$PACKAGE" "bind_ip")
             # Read values from config file
             PORT=$(read_config "$PACKAGE" "port")
             BIND_IP=$(read_config "$PACKAGE" "bind_ip")
             # if BIND_IP ===0.0.0.0 then open firewall 
-            if [ "$BIND_IP" = "0.0.0.0" ]; then
+            if [ "$BIND_IP" = "0.0.0.0" ] && [ "$USE_ROOT_ACCESS" = "y"  ]; then
                 sudo iptables -A INPUT -p tcp --dport "$PORT" -j ACCEPT
             fi
             # Define paths
@@ -174,46 +201,34 @@ update_configs() {
             # Ensure directories exist
             mkdir -p "$DATA_PATH" "$LOGS_PATH"
             
+            # if "$PACKAGE" = "sonic"; then 
             if [ "$PACKAGE" = "mariadb" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.conf"
                 # insert into boot script
-                echo "mariadbd_safe --defaults-file=$CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log" >> "$BOOT_SCRIPT"
+                #Copy old data
+                # cp -r $PREFIX/var/lib/mysql/* $DATA_PATH
+                # start fresh
+                mysql_install_db --datadir=$DATA_PATH
+                echo "mariadbd-safe --datadir=$DATA_PATH --log-error=$LOGS_PATH/error.log &" >> "$BOOT_SCRIPT"
                 cat > "$CONFIG_PATH" <<EOF
 [mysqld]
 # Basic Settings
-user = mysql
 port = $PORT
-bind-address = $BIND_IP
 
 # Custom Database Directory
 datadir = $DATA_PATH
-socket=$PREFIX/var/run/mysqld.sock
 
 # Logging
-log-error = $LOGS_PATH/$PACKAGE/error.log
+log-error = $LOGS_PATH/error.log
 slow-query-log = 1
-slow-query-log-file = $LOGS_PATH/$PACKAGE/slow.log
-
-# Performance Tweaks
-innodb_buffer_pool_size = 256M
-max_connections = 30
-query_cache_size = 16M
-query_cache_limit = 4M
-innodb_file_per_table = 1
-innodb_flush_log_at_trx_commit = 2
-innodb_log_file_size = 256M
-innodb_flush_method = O_DIRECT
-
-# Security Settings
-# Disabling symbolic links is recommended to prevent security vulnerabilities
-symbolic-links = 0
+slow-query-log-file = $LOGS_PATH/slow.log
 EOF
             fi
 
-            if [ "$PACKAGE" = "sonic" ]; then
+            if [ "$PACKAGE" = "sonicsearch" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.cfg"
                 # insert into boot script
-                echo "sonic --config $CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log " >> "$BOOT_SCRIPT"
+                echo "sonic --config $CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT" 
                 cat > "$CONFIG_PATH" <<EOF
 # Sonic
 # Fast, lightweight and schema-less search backend
@@ -273,12 +288,12 @@ EOF
             if [ "$PACKAGE" = "nginx" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.conf"
                 # insert into boot script
-                echo "nginx -c \$CONFIG_PATH" >> "$BOOT_SCRIPT"
+                echo "nginx -c $CONFIG_PATH &" >> "$BOOT_SCRIPT"
                 cat > "$CONFIG_PATH" <<EOF
 # Nginx
 # nginx -c config.cfg
 worker_processes auto;
-error_log $LOGS_PATH/$PACKAGE/error.log;
+error_log $LOGS_PATH/error.log;
 # pid /var/run/nginx.pid;
 events {
     worker_connections 1024;
@@ -314,12 +329,12 @@ http {
     log_format      main  '\$remote_addr - \$remote_user [\$time_local] "\$request" '
                         '\$status \$body_bytes_sent "\$http_referer" '
                         '"\$http_user_agent" "\$http_x_forwarded_for"';
-    access_log      $LOGS_PATH/$PACKAGE/access.log  main;
+    access_log      $LOGS_PATH/access.log  main;
     sendfile        on;
     keepalive_timeout  65;
     upstream backend {
         ip_hash;
-        server 127.0.0.1:3001;
+        server 127.0.0.1:3000;
         server 127.0.0.1:3002;
     }
     server {
@@ -339,7 +354,7 @@ EOF
             if [ "$PACKAGE" = "redis" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.conf"
                 # insert into boot script
-                echo "redis-server \$CONFIG_PATH" >> "$BOOT_SCRIPT"
+                echo "redis-server $CONFIG_PATH" >> "$BOOT_SCRIPT"
                 cat > "$CONFIG_PATH" <<EOF
 # Redis
 # redis-server config.cfg
@@ -353,9 +368,10 @@ EOF
 
 # Network settings
 # bind 0.0.0.0 to listen from all anywhere
-
-port $PORT # Listen only on localhost (change for remote access)
-bind $BIND_IP  # Default Redis port
+bind $BIND_IP
+port $PORT 
+# Listen only on localhost (change for remote access)
+# Default Redis port
 
 # Disable protected mode for external access (be careful)
 protected-mode no
@@ -364,26 +380,31 @@ protected-mode no
 daemonize yes
 
 # Log file
-logfile "$LOGS_PATH/$PACKAGE.log"
+logfile $LOGS_PATH/$PACKAGE.log
 
 # Database settings
-save 900 1   # Save every 15 minutes if at least 1 change is made
-save 300 100  # Save every 5 minutes if 10 changes are made
-save 60 1500  # Save every 1 minute if 100 changes are made
+save 900 1   
+# Save every 15 minutes if at least 1 change is made
+save 300 100 
+# Save every 5 minutes if 10 changes are made
+save 60 1500  
+# Save every 1 minute if 100 changes are made
 
 # RDB file location
-dir "$DATA_PATH/$PACKAGE/"
+dir $DATA_PATH/ 
 
 # Max memory usage (set based on available RAM)
 maxmemory 100mb
-maxmemory-policy allkeys-lru  # Eviction policy
+maxmemory-policy allkeys-lru  
+# Eviction policy
 
 # Enable Append-Only Mode for durability
 appendonly yes
 appendfilename "appendonly.aof"
 
 # Enable password authentication (optional)
-requirepass $MASTER_PASSWORD  # Change this to a strong password
+#requirepass $MASTER_PASSWORD  
+# Change this to a strong password
 
 # Enable Redis Cluster (optional)
 # cluster-enabled yes
@@ -394,92 +415,61 @@ EOF
             fi
 
             if [ "$PACKAGE" = "vector" ]; then
-                CONFIG_PATH="$CONF_DIR/$PACKAGE.toml"
+                CONFIG_PATH="$CONF_DIR/$PACKAGE.yaml"
                 # insert into boot script
-                echo "vector --config $CONFIG_PATH" >> "$BOOT_SCRIPT"
+                echo "vector --config $CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT &"
                 cat > "$CONFIG_PATH" <<EOF
 # Vector
 
 # Global configuration
-data_dir = "$DATA_PATH/$PACKAGE/"
+data_dir: "$DATA_PATH/"
 
 # Sources
-[sources.nest_logs]
-type = "socket"
-address = "0.0.0.0:9000"
-mode = "tcp"
+sources:
+  prod_logs:
+    type: socket
+    address: "$BIND_IP:$PORT"
+    mode: "tcp"
+    format: "json"
 
-# Transform: Parse log format
-[transforms.parse_logs]
-type = "remap"
-inputs = ["file_logs"]
-source = '''
-. = parse_regex!(.message, r'^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (?P<level>\w+) (?P<message>.*)$')
-'''
+sinks:
+  victoria_metrics:
+    inputs: ["prod_logs"]
+    type: http
+    uri: http://localhost:9428/insert/jsonline?_stream_fields=host,container_name&_msg_field=message&_time_field=timestamp
+    compression: gzip
+    encoding:
+      codec: json
+    framing:
+      method: newline_delimited
+    healthcheck:
+      enabled: false
 
-# Sinks
-[sinks.victoria_metrics]
-type = "prometheus_remote_write"
-inputs = ["system_metrics"]
-endpoint = "http://localhost:8428/api/v1/write"
-
-[sinks.zincsearch]
-type = "http"
-inputs = ["parse_logs"]
-uri = "http://localhost:4080/api/default/_bulk"
-method = "post"
-encoding.codec = "json"
+  zincsearch:
+    type: http
+    inputs: ["prod_logs"]  # Input from the parsing/enrichment transform
+    uri: "http://localhost:4080/api/default/_bulk"
+    method: "post"
+    encoding:
+      codec: "json"
 
 EOF
             fi
 
-            if [ "$PACKAGE" = "victoriametrics" ]; then
+            if [ "$PACKAGE" = "victoria-metrics" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.yml"
                 # insert into boot script
-                echo "victoria-metrics -config.file=$CONFIG_PATH" >> "$BOOT_SCRIPT"
+                echo "victoria-metrics -storageDataPath $DATA_PATH -retentionPeriod=12 -maxConcurrentInserts=16 -search.maxQueryDuration=1m -httpListenAddr=:$PORT" >> "$BOOT_SCRIPT > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & "
 
                 cat > "$CONFIG_PATH" <<EOF
-# Victoria Metrics
-# Global settings
-storageDataPath: "$DATA_PATH/$PACKAGE/"
-retentionPeriod: "1y"
-
-# HTTP server settings
-httpListenAddr: ":8428"
-
-# Scrape settings
-promscrape:
-  enabled: true
-  config: |
-    global:
-      scrape_interval: 15s
-      evaluation_interval: 15s
-      
-    scrape_configs:
-      - job_name: "vector"
-        static_configs:
-          - targets: ["localhost:8686"]
-        
-      - job_name: "node"
-        static_configs:
-          - targets: ["localhost:9100"]
-# Search settings  
-search:
-  maxUniqueTimeseries: 1000000
-  maxSeries: 30000
-
-# victoria-metrics -config.file=~/victoriametrics.yml
-# # Remote write settings
-# remoteWrite:
-#   - url: "http://localhost:8428/api/v1/write"
-
+victoria-metrics -storageDataPath $DATA_PATH -retentionPeriod=12 -maxConcurrentInserts=16 -search.maxQueryDuration=1m -httpListenAddr=:$PORT
 EOF
             fi
             
             if [ "$PACKAGE" = "zincsearch" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.yaml"
                 # insert into boot script
-                echo "zincsearch --config $CONFIG_PATH" >> "$BOOT_SCRIPT"
+                echo "zincsearch --config $CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT & "
                 cat > "$CONFIG_PATH" <<EOF
 # ZincSearch
 # zincsearch --config config.yaml
@@ -488,7 +478,7 @@ server:
   address: "$BIND_IP"
 
 data:
-  path: "$DATA_PATH/$PACKAGE"
+  path: "$DATA_PATH/"
   storage_mode: "disk"
 
 auth:
@@ -514,29 +504,28 @@ index:
           type: "standard"
 EOF
             fi
-fi
 
-    done < "$CONFIG_FILE"
+
+    done 
 }
 
+update_configs
 
 
 chmod +x "$BOOT_SCRIPT"
+cp $BOOT_SCRIPT $PROD_DIR/boot.sh
 
 if [ "$RUN_SERVICES" = "y" ]; then
     termux-wake-lock
     termux-setup-storage
     print_message "Running services on startup..." info
     "$BOOT_SCRIPT"
-fi
-
-
-# Verify Mariadb is running
+    # Verify Mariadb is running
 print_message "Verifying Mariadb is running..." info
 if mariadb-admin ping &>/dev/null; then
-    print_message "MariaDB is running!" success
+    echo "Mariadb is running successfully!" success
 else
-    print_message "MariaDB is NOT running!" fail
+    echo "Mariadb failed to start. Check the script and logs." fail
 fi
 
 
@@ -545,7 +534,7 @@ print_message "Verifying Zincsearch is running..." info
 if zincsearch --version &>/dev/null; then
     print_message "Zincsearch is running successfully!" success
 else
-    print_message "Zincsearch failed to start." fail
+    print_message "Zincsearch failed to start. Check the script and logs." fail
 fi
 
 
@@ -593,7 +582,13 @@ else
     print_message "Sonic failed to start. Check the script and logs."
 fi
 
+fi
 
+# Pending tasks 
+# Hold liftbridge and fluent bit
+# 1. Create build file for every package for latest version - done 
+# 2. Create config for every package - done
+# 3. Download packages from repo and ru - done
 # create  user 'care@127.0.0.1' identified by 'password'
 # create user for all domain
 # create user 'dummy@%' identified by 'password'
@@ -608,9 +603,8 @@ fi
 # ollama run qwen2.5-coder:0.5b
 # ollama run deepscaler:1.5b-preview-q4_K_M
 # sudo arp-scan  --localnet
+# mongodb on hold
 # sudo nmap -sS -p- 192.168.97.47
 # exposing 3306 & 4080 port if root access avaialable
 
 print_message "Setup complete! Reboot your device to confirm automatic startup." info
-
-
