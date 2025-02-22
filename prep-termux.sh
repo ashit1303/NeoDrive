@@ -163,6 +163,11 @@ for package in figlet curl tree wget nano iptables msmtp arp-scan openssh git ng
             print_message "Redis is already installed and running... Skipping..." skip
             continue
         fi
+    elif [ "$package" = "mariadb-server" ]; then
+        if command --version mariadb &>/dev/null; then
+            print_message "OpenSSH is already installed Skipping..." skip
+            continue
+        fi
     elif [ "$package" = "openssh" ]; then
         if command -v sshd &>/dev/null; then
             print_message "OpenSSH is already installed and running... Skipping..." skip
@@ -450,7 +455,7 @@ EOF
             if [ "$PACKAGE" = "vector" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.yaml"
                 # insert into boot script
-                echo "vector --config $CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT &"
+                echo "vector --config $CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT"
                 cat > "$CONFIG_PATH" <<EOF
 # Vector
 
@@ -492,7 +497,7 @@ EOF
             if [ "$PACKAGE" = "victoria-metrics" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.yml"
                 # insert into boot script
-                echo "victoria-metrics -storageDataPath $DATA_PATH -retentionPeriod=12 -maxConcurrentInserts=16 -search.maxQueryDuration=1m -httpListenAddr=:$PORT" >> "$BOOT_SCRIPT > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & "
+                echo "victoria-metrics -storageDataPath $DATA_PATH -retentionPeriod=12 -maxConcurrentInserts=16 -search.maxQueryDuration=1m -httpListenAddr=:$PORT  > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT"
 
                 cat > "$CONFIG_PATH" <<EOF
 victoria-metrics -storageDataPath $DATA_PATH -retentionPeriod=12 -maxConcurrentInserts=16 -search.maxQueryDuration=1m -httpListenAddr=:$PORT
@@ -502,7 +507,7 @@ EOF
             if [ "$PACKAGE" = "zincsearch" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.yaml"
                 # insert into boot script
-                echo "zincsearch --config $CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT & "
+                echo "zincsearch --config $CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT"
                 cat > "$CONFIG_PATH" <<EOF
 # ZincSearch
 # zincsearch --config config.yaml
@@ -546,7 +551,7 @@ update_configs
 
 
 chmod +x "$BOOT_SCRIPT"
-cp $BOOT_SCRIPT $PROD_DIR/boot.sh
+# cp $BOOT_SCRIPT $PROD_DIR/boot.sh
 
 if [ "$RUN_SERVICES" = "y" ]; then
     termux-wake-lock

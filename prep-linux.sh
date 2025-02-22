@@ -105,7 +105,7 @@ echo "figlet -f slant '$MASTER_USER'" >> ~/.bashrc
 
 print_message "Installing necessary packages..." info
 # sudo apt install tsu figlet openssh git curl tree wget nano nodejs termux-services iptables iproute2 nmap nginx arp-scan mariadb -y
-for package in figlet curl tree wget nano termux-services iptables iproute2 nmap arp-scan openssh git nginx nodejs mariadb redis victoria-metrics  ; do
+for package in figlet curl tree wget nano iptables iproute2 nmap arp-scan openssh git nginx nodejs mariadb-server redis victoria-metrics  ; do
     if command -v "$package" &>/dev/null; then
         print_message "$package is already installed... Skipping..." skip
         continue
@@ -117,6 +117,11 @@ for package in figlet curl tree wget nano termux-services iptables iproute2 nmap
         fi
     elif [ "$package" = "openssh" ]; then
         if command -v sshd &>/dev/null; then
+            print_message "OpenSSH is already installed Skipping..." skip
+            continue
+        fi
+    elif [ "$package" = "mariadb-server" ]; then
+        if command --version mariadb &>/dev/null; then
             print_message "OpenSSH is already installed Skipping..." skip
             continue
         fi
@@ -162,11 +167,6 @@ else
     rm zincsearch_0.4.10_Linux_x86_64.tar.gz
     print_message " ZincSearch installed successfully!" success
 fi
-
-
-
-print_message "Installing Zinc Search..." info
-
 
 
 CONFIG_FILE="./pkgs.ini"
@@ -423,7 +423,7 @@ EOF
             if [ "$PACKAGE" = "vector" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.yaml"
                 # insert into boot script
-                echo "vector --config $CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT &"
+                echo "vector --config $CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT"
                 cat > "$CONFIG_PATH" <<EOF
 # Vector
 
@@ -465,7 +465,7 @@ EOF
             if [ "$PACKAGE" = "victoria-metrics" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.yml"
                 # insert into boot script
-                echo "victoria-metrics -storageDataPath $DATA_PATH -retentionPeriod=12 -maxConcurrentInserts=16 -search.maxQueryDuration=1m -httpListenAddr=:$PORT" >> "$BOOT_SCRIPT > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & "
+                echo "victoria-metrics -storageDataPath $DATA_PATH -retentionPeriod=12 -maxConcurrentInserts=16 -search.maxQueryDuration=1m -httpListenAddr=:$PORT > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT"
 
                 cat > "$CONFIG_PATH" <<EOF
 victoria-metrics -storageDataPath $DATA_PATH -retentionPeriod=12 -maxConcurrentInserts=16 -search.maxQueryDuration=1m -httpListenAddr=:$PORT
@@ -475,7 +475,7 @@ EOF
             if [ "$PACKAGE" = "zincsearch" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.yaml"
                 # insert into boot script
-                echo "zincsearch --config $CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT & "
+                echo "zincsearch --config $CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT"
                 cat > "$CONFIG_PATH" <<EOF
 # ZincSearch
 # zincsearch --config config.yaml
