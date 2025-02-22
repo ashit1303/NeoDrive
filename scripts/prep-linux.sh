@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/bash
+#!/bin/bash
 
 print_message() {
     case "$2" in
@@ -22,10 +22,11 @@ print_message() {
 }
 
 
-
 header() {
     COLOR="\e[1;35m" # Purple
     RESET="\e[0m"     # Reset color
+
+    echo -e "${COLOR}"
     cat <<EOF
 
 # Install Git
@@ -51,22 +52,9 @@ EOF
 header
 
 
-read -rp "Do you want to use root access? (y/n): " USE_ROOT_ACCESS
-
-# Check if root access is available
-
-if [ "$USE_ROOT_ACCESS" = "y" ]; then
-    PREFIX="/data/data/com.termux/files/usr"
-else  
-    print_message "ROOT ACCESS NOT AVAILABLE" fail
-    # trap 'echo "Aborted due to an error"' 
-    # exit 1
-    # PREFIX="$HOME/.termux"
-fi
-
 read -rp "Enter master username(admin): " MASTER_USER
 read -rp "Enter master password(admin): " MASTER_PASSWORD
-read -rp "Where do you want to keep your data files 1) ~/xData 2) ~/../xData 3) ~/.termux/xData 4) ~/storage/shared/xData  5) username (1 or 2 or 3 or 4 or 5) " PROD_DIR 
+read -rp "Where do you want to keep your data files 1) ~/xData 2) ~/../xData (1 or 2 )" PROD_DIR 
 read -rp "Do you want to run services on start? (y/n): " RUN_SERVICES
 
 # Later phase
@@ -83,8 +71,6 @@ elif [ "$PROD_DIR" = "3" ]; then
 elif [ "$PROD_DIR" = "4" ]; then
     termux-setup-storage
     PROD_DIR="$HOME/storage/shared/xData"
-elif [ "$PROD_DIR" = "5" ]; then
-    PROD_DIR="$HOME/$MASTER_USER"
 else 
     print_message "Invalid choice" fail
     exit 1
@@ -94,9 +80,8 @@ fi
 mkdir -p "$PROD_DIR"
 
 # Create boot directory if it doesn't exist
-BOOT_DIR="$HOME/.termux/boot"
+BOOT_DIR="$PROD_DIR/initiate"
 mkdir -p "$BOOT_DIR"
-touch "$BOOT_DIR/boot.sh"
 BOOT_SCRIPT="$BOOT_DIR/boot.sh"
 
 # Create directory in $HOME/../prod
@@ -108,59 +93,31 @@ mkdir -p "$CONF_DIR"
 mkdir -p "$LOGS_DIR"
 
 # Store all responses in a file inside the created directory
-RESPONSE_FILE="$PROD_DIR/termux-prep.conf"
-rm -f "$RESPONSE_FILE"
-touch "$RESPONSE_FILE"
+RESPONSE_FILE="$BOOT_DIR/initiate.logs"
 exec > >(tee -a "$RESPONSE_FILE") 2>&1
 
 print_message "Setting up termux..." info
 
+echo "figlet -f slant '$MASTER_USER'" >> ~/.bashrc 
+
+
 print_message "Updating and upgrading packages..." info
-
-pkg update -y && pkg upgrade -y
-
-if [ "$USE_ROOT_ACCESS" = "y" ]; then
-    pkg install root-repo -y && pkg update -y
-    
-    for package in iproute2 nmap arp-scan tsu; do
-        if command -v "$package" &>/dev/null; then
-            print_message "$package is already installed... Skipping..." skip
-            continue
-        fi
-
-        if [ "$package" = "iproute2" ]; then
-            if command -v ip &>/dev/null; then
-                print_message "iproute2 is already installed and running... Skipping..." skip
-                continue
-            fi
-        elif [ "$package" = "nmap" ]; then
-            if command -v nmap &>/dev/null; then
-                print_message "Nmap is already installed and running... Skipping..." skip
-                continue
-            fi
-        fi
-
-        print_message "$package is not installed, installing..." info
-        if pkg install "$package" -y; then
-            print_message "$package installed successfully!" success
-        else
-            print_message "Failed to install $package" fail
-        fi
-    done
-fi
-
+sudo apt update -y && apt upgrade -y
 print_message "Installing necessary packages..." info
-
-# pkg install tsu figlet openssh git curl tree wget nano nodejs termux-services iptables iproute2 nmap nginx arp-scan mariadb -y
-for package in figlet curl tree wget nano iptables msmtp arp-scan openssh git nginx nodejs mariadb redis; do
+# sudo apt install tsu figlet openssh git curl tree wget nano nodejs termux-services iptables iproute2 nmap nginx arp-scan mariadb -y
+for package in figlet curl tree wget nano iptables iproute2 nmap arp-scan net-tools openssh git nginx nodejs mariadb-server redis victoria-metrics  ; do
     if command -v "$package" &>/dev/null; then
         print_message "$package is already installed... Skipping..." skip
         continue
     fi
-
     if [ "$package" = "redis" ]; then
         if command -v redis-cli &>/dev/null; then
-            print_message "Redis is already installed and running... Skipping..." skip
+            print_message "Redis is already installed Skipping..." skip
+            continue
+        fi
+    elif [ "$package" = "openssh" ]; then
+        if command -v sshd &>/dev/null; then
+            print_message "OpenSSH is already installed Skipping..." skip
             continue
         fi
     elif [ "$package" = "mariadb-server" ]; then
@@ -168,20 +125,25 @@ for package in figlet curl tree wget nano iptables msmtp arp-scan openssh git ng
             print_message "OpenSSH is already installed Skipping..." skip
             continue
         fi
-    elif [ "$package" = "openssh" ]; then
-        if command -v sshd &>/dev/null; then
-            print_message "OpenSSH is already installed and running... Skipping..." skip
-            continue
-        fi
     elif [ "$package" = "nodejs" ]; then
         if command -v node &>/dev/null; then
-            print_message "Node.js is already installed and running... Skipping..." skip
+            print_message "Node.js is already installed Skipping..." skip
+            continue
+        fi
+    elif [ "$package" = "iproute2" ]; then
+        if command -v ip &>/dev/null; then
+            print_message "iproute2 is already installed Skipping..." skip
+            continue
+        fi
+    elif [ "$package" = "nmap" ]; then
+        if command -v nmap &>/dev/null; then
+            print_message "Nmap is already installed Skipping..." skip
             continue
         fi
     fi
 
     print_message "$package is not installed, installing..." info
-    if pkg install "$package" -y; then
+    if sudo apt install "$package" -y; then
         print_message "$package installed successfully!" success
     else
         print_message "Failed to install $package" fail
@@ -189,18 +151,22 @@ for package in figlet curl tree wget nano iptables msmtp arp-scan openssh git ng
 done
 
 
-echo "figlet -f slant 'Termux'" >> ~/.bashrc
-echo 'PS1='\''\[\e[1;32m\]\u@\h:\[\e[0m\]\[\e[1;34m\]$(if [[ "$PWD" == "$HOME" ]]; then echo "~"; else echo "~${PWD#$HOME/}"; fi)\[\e[0m\]\$ '\'' ' >> ~/.bashrc
-
-# Download and extract the archive
-curl -L https://github.com/ashit1303/bash_scripts/releases/download/v1.0/aarch64.tar.xz -o aarch64.tar.xz
-tar -xf aarch64.tar.xz
-chmod +x aarch64/*
-# Move all extracted files to $PREFIX/bin
-mv -n aarch64/* "$PREFIX"/bin/
-
-# Clean up
-rm -rf aarch64 aarch64.tar.xz
+if vector --version &>/dev/null; then
+    print_message "Vector is already installed Skipping... !" skip
+else
+    print_message "Installing Vector..." info
+    wget https://packages.timber.io/vector/0.44.0/vector_0.44.0-1_amd64.deb
+    sudo dpkg -i vector_0.44.0-1_amd64.deb
+    rm vector_0.44.0-1_amd64.deb
+    print_message "Vector installed successfully!" success
+    print_message "Installing ZincSearch ..." info
+    wget https://github.com/zincsearch/zincsearch/releases/download/v0.4.10/zincsearch_0.4.10_Linux_x86_64.tar.gz
+    tar -xvf zincsearch_0.4.10_Linux_x86_64.tar.gz
+    sudo chmod +x zincsearch
+    sudo mv zincsearch /usr/local/bin/
+    rm zincsearch_0.4.10_Linux_x86_64.tar.gz
+    print_message " ZincSearch installed successfully!" success
+fi
 
 
 CONFIG_FILE="./pkgs.ini"
@@ -208,14 +174,16 @@ CONFIG_FILE="./pkgs.ini"
 # Ensure required directories exist
 mkdir -p "$CONF_DIR" "$DATA_DIR" "$LOGS_DIR"
 
-# Function to read values from pkgs.ini
+# Function to read values from the config file
 read_config() {
-    local package=$1
-    local key=$2
-    awk -F '=' -v section="[$package]" -v key="$key" '
-    $0 == section {found=1; next} 
-    found && $1 == key {gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2; exit}
-    ' "$CONFIG_FILE"
+    local package="$1"
+    local key="$2"
+    local value=$(awk -F= -v section="[$package]" -v key="$key" '
+        $0 ~ section {found=1; next} 
+        found && $1 ~ key {print $2; exit}
+    ' "$CONFIG_FILE" | tr -d '[:space:]')
+
+    echo "$value"
 }
 
 print_message "Creating startup script..." info
@@ -497,7 +465,7 @@ EOF
             if [ "$PACKAGE" = "victoria-metrics" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.yml"
                 # insert into boot script
-                echo "victoria-metrics -storageDataPath $DATA_PATH -retentionPeriod=12 -maxConcurrentInserts=16 -search.maxQueryDuration=1m -httpListenAddr=:$PORT  > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT"
+                echo "victoria-metrics -storageDataPath $DATA_PATH -retentionPeriod=12 -maxConcurrentInserts=16 -search.maxQueryDuration=1m -httpListenAddr=:$PORT > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT"
 
                 cat > "$CONFIG_PATH" <<EOF
 victoria-metrics -storageDataPath $DATA_PATH -retentionPeriod=12 -maxConcurrentInserts=16 -search.maxQueryDuration=1m -httpListenAddr=:$PORT
@@ -551,18 +519,15 @@ update_configs
 
 
 chmod +x "$BOOT_SCRIPT"
-# cp $BOOT_SCRIPT $PROD_DIR/boot.sh
+cp $BOOT_SCRIPT $PROD_DIR/boot.sh
 
 if [ "$RUN_SERVICES" = "y" ]; then
-    termux-wake-lock
-    termux-setup-storage
     print_message "Running services on startup..." info
     "$BOOT_SCRIPT"
     # Verify Mariadb is running
 print_message "Verifying Mariadb is running..." info
 if mariadb-admin ping &>/dev/null; then
     echo "Mariadb is running successfully!" success
-    mariadb <
 else
     echo "Mariadb failed to start. Check the script and logs." fail
 fi
