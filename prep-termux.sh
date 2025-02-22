@@ -507,7 +507,7 @@ EOF
             if [ "$PACKAGE" = "zincsearch" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.yaml"
                 # insert into boot script
-                echo "zincsearch --config $CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT"
+                echo "ZINC_FIRST_ADMIN_USER=$MASTER_USER ZINC_FIRST_ADMIN_PASSWORD=$MASTER_PASSWORD zincsearch --config $CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT"
                 cat > "$CONFIG_PATH" <<EOF
 # ZincSearch
 # zincsearch --config config.yaml
@@ -562,6 +562,7 @@ if [ "$RUN_SERVICES" = "y" ]; then
 print_message "Verifying Mariadb is running..." info
 if mariadb-admin ping &>/dev/null; then
     echo "Mariadb is running successfully!" success
+    mariadb <
 else
     echo "Mariadb failed to start. Check the script and logs." fail
 fi

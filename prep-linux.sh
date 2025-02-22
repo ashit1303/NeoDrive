@@ -105,7 +105,7 @@ echo "figlet -f slant '$MASTER_USER'" >> ~/.bashrc
 
 print_message "Installing necessary packages..." info
 # sudo apt install tsu figlet openssh git curl tree wget nano nodejs termux-services iptables iproute2 nmap nginx arp-scan mariadb -y
-for package in figlet curl tree wget nano iptables iproute2 nmap arp-scan openssh git nginx nodejs mariadb-server redis victoria-metrics  ; do
+for package in figlet curl tree wget nano iptables iproute2 nmap arp-scan net-tools openssh git nginx nodejs mariadb-server redis victoria-metrics  ; do
     if command -v "$package" &>/dev/null; then
         print_message "$package is already installed... Skipping..." skip
         continue
@@ -475,7 +475,7 @@ EOF
             if [ "$PACKAGE" = "zincsearch" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.yaml"
                 # insert into boot script
-                echo "zincsearch --config $CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT"
+                echo "ZINC_FIRST_ADMIN_USER=$MASTER_USER ZINC_FIRST_ADMIN_PASSWORD=$MASTER_PASSWORD zincsearch --config $CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT"
                 cat > "$CONFIG_PATH" <<EOF
 # ZincSearch
 # zincsearch --config config.yaml
