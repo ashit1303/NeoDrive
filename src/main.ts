@@ -6,15 +6,26 @@ import { log } from 'console';
 import { HttpExceptionFilter } from './core/http-exception.filter';
 import { ConfigService } from '@nestjs/config';
 import { ResponseInterceptor } from './core/response.interceptor';
+import {parse,stringify} from 'json-bigint';
+
+
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+// DANGEROUSLY override JSON prototype methods to handle big ints.
+  JSON.parse = parse;
+  JSON.stringify = stringify;
+  // validation
   app.useGlobalPipes(new ValidationPipe());
+  // cors
   app.enableCors();
+  // Response restructure while sending res from API 
   app.useGlobalInterceptors(new ResponseInterceptor());
+  // Error standor structure while sending errors from API
   app.useGlobalFilters(new HttpExceptionFilter());
-  log('printing env', configService.get('ENV'));
+  // log('printing env', configService.get('ENV'));
   if(configService.get('ENV') === 'main'){
     log('Swagger is enabled');
     const swagConfig = new DocumentBuilder()

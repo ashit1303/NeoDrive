@@ -12,65 +12,21 @@ export class SonicService {
     port: parseInt(this.configService.get<string>('SONIC_PORT')) || 1491,
     // port: 1491,
   }
-  private sonicSearch = new SonicChannel.Search(
-    this.sonicConfig
-  )
-  .connect({
-    connected : function() {
-      // Connected handler
-      console.info("Sonic Channel succeeded to connect to host (search).");
-    },
-  
-    disconnected : function() {
-      // Disconnected handler
-      console.error("Sonic Channel is now disconnected (search).");
-    },
-  
-    timeout : function() {
-      // Timeout handler
-      console.error("Sonic Channel connection timed out (search).");
-    },
-  
-    retrying : function() {
-      // Retry handler
-      console.error("Trying to reconnect to Sonic Channel (search)...");
-    },
-  
-    error : function(error) {
-      // Failure handler
-      console.error("Sonic Channel failed to connect to host (search).", error);
-    }
-  });;
+  private sonicSearch = new SonicChannel.Search(this.sonicConfig).connect({
+    connected: () => console.info('Sonic Channel connected (search).'),
+    disconnected: () => console.error('Sonic Channel disconnected (search).'),
+    timeout: () => console.error('Sonic Channel connection timed out (search).'),
+    retrying: () => console.error('Trying to reconnect to Sonic Channel (search)...'),
+    error: (error) => console.error('Sonic Channel connection failed (search).', error),
+  });
 
-  private sonicIngest = new SonicChannel.Ingest(
-    this.sonicConfig
-  )
-  .connect({
-    connected : function() {
-      // Connected handler
-      console.info("Sonic Channel succeeded to connect to host (ingest).");
-    },
-  
-    disconnected : function() {
-      // Disconnected handler
-      console.error("Sonic Channel is now disconnected (ingest).");
-    },
-  
-    timeout : function() {
-      // Timeout handler
-      console.error("Sonic Channel connection timed out (ingest).");
-    },
-  
-    retrying : function() {
-      // Retry handler
-      console.error("Trying to reconnect to Sonic Channel (ingest)...");
-    }, 
-  
-    error : function(error) {
-      // Failure handler
-      console.error("Sonic Channel failed to connect to host (ingest).", error);
-    }
-  })
+  private sonicIngest = new SonicChannel.Ingest(this.sonicConfig).connect({
+    connected: () => console.info('Sonic Channel connected (search).'),
+    disconnected: () => console.error('Sonic Channel disconnected (search).'),
+    timeout: () => console.error('Sonic Channel connection timed out (search).'),
+    retrying: () => console.error('Trying to reconnect to Sonic Channel (search)...'),
+    error: (error) => console.error('Sonic Channel connection failed (search).', error),
+  });
   
 
   async search(collection: string,bucket : string, query: string): Promise<string[]> {

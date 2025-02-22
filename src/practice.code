@@ -18,6 +18,95 @@
 // @UsePipes(new JoiValidate(loginReq))
 
 
+/* TO USE JWE FOR ENCRYPT DECRYPT JWT
+import { Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { JweService } from './jwe.service'; // Import your JWE service
+
+@Injectable()
+export class AuthService {
+  constru// TO USE JWE FOR ENCRYPT DECRYPT JWTctor(
+    private readonly jwtService: JwtService,
+    private readonly jweService: JweService, // Inject JWE service
+  ) {}
+
+  async login(user: User) {
+    const payload = { sub: user.id };
+
+    // 1. Sign the payload (JWS)
+    const signedToken = await this.jwtService.sign(payload);
+
+    // 2. Encrypt the signed token (JWE)
+    const encryptedToken = await this.jweService.encrypt(signedToken);
+
+    return { access_token: encryptedToken }; // Send the encrypted token
+  }
+
+    async validateToken(token:string){
+        const decryptedToken = await this.jweService.decrypt(token);
+        return await this.jwtService.verify(decryptedToken);
+    }
+}
+
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { Strategy, ExtractJwt } from 'passport-jwt';
+import { AuthService } from './auth.service'; // Import your AuthService
+
+@Injectable()
+export class JwtStrategy extends PassportStrategy(Strategy) {
+  constructor(private readonly authService: AuthService) {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      secretOrKey: 'your-secret-key', // You still need a secret for the initial JWS
+    });
+  }
+
+  async validate(token: string): Promise<any> {
+    try {
+        const payload = await this.authService.validateToken(token); // Decrypt and verify
+
+        const user = await this.authService.findUserById(payload.sub);
+        if (!user) {
+            throw new UnauthorizedException();
+        }
+        return user;
+
+    } catch (error) {
+        throw new UnauthorizedException();
+    }
+  }
+}
+
+import { Injectable } from '@nestjs/common';
+import * as jose from 'node-jose';
+
+@Injectable()
+export class JweService {
+  private key: jose.JWK.Key; // Your encryption key
+
+  constructor() {
+    // Generate or load your encryption key.  This is CRUCIAL.
+    // **DO NOT** hardcode keys in your code.  Use environment variables or a secure key store.
+    this.generateKey().then(k => this.key = k); // Example for generating, replace for loading
+    // Example for loading from a JWK file:
+    // jose.JWK.asKey(fs.readFileSync('path/to/your/key.jwk')).then(k => this.key = k);
+  }
+
+    private async generateKey(){
+        return await jose.JWK.generate('oct', 256, { alg: 'A256GCM' });
+    }
+
+  async encrypt(payload: any): Promise<string> {
+    const encrypted = await jose.JWE.encrypt(this.key, JSON.stringify(payload),{alg: 'A256GCM', enc: 'A256GCM'});
+    return encrypted;
+  }
+
+  async decrypt(jwe: string): Promise<any> {
+    const decrypted = await jose.JWE.decrypt(this.key, jwe);
+    return JSON.parse(decrypted.payload.toString());
+  }
+} */
 
 import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport'; // Example auth guard
