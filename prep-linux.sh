@@ -105,34 +105,34 @@ echo "figlet -f slant '$MASTER_USER'" >> ~/.bashrc
 
 print_message "Installing necessary packages..." info
 # sudo apt install tsu figlet openssh git curl tree wget nano nodejs termux-services iptables iproute2 nmap nginx arp-scan mariadb -y
-for package in figlet curl tree wget nano termux-services iptables iproute2 nmap postfix arp-scan openssh git nginx nodejs mariadb redis mongodb victoria-metrics  ; do
+for package in figlet curl tree wget nano termux-services iptables iproute2 nmap arp-scan openssh git nginx nodejs mariadb redis victoria-metrics  ; do
     if command -v "$package" &>/dev/null; then
         print_message "$package is already installed... Skipping..." skip
         continue
     fi
     if [ "$package" = "redis" ]; then
         if command -v redis-cli &>/dev/null; then
-            print_message "Redis is already installed and running... Skipping..." skip
+            print_message "Redis is already installed Skipping..." skip
             continue
         fi
     elif [ "$package" = "openssh" ]; then
         if command -v sshd &>/dev/null; then
-            print_message "OpenSSH is already installed and running... Skipping..." skip
+            print_message "OpenSSH is already installed Skipping..." skip
             continue
         fi
     elif [ "$package" = "nodejs" ]; then
         if command -v node &>/dev/null; then
-            print_message "Node.js is already installed and running... Skipping..." skip
+            print_message "Node.js is already installed Skipping..." skip
             continue
         fi
     elif [ "$package" = "iproute2" ]; then
         if command -v ip &>/dev/null; then
-            print_message "iproute2 is already installed and running... Skipping..." skip
+            print_message "iproute2 is already installed Skipping..." skip
             continue
         fi
     elif [ "$package" = "nmap" ]; then
         if command -v nmap &>/dev/null; then
-            print_message "Nmap is already installed and running... Skipping..." skip
+            print_message "Nmap is already installed Skipping..." skip
             continue
         fi
     fi
@@ -145,25 +145,31 @@ for package in figlet curl tree wget nano termux-services iptables iproute2 nmap
     fi
 done
 
-if [ "$package" = "nmap" ]; then
-        if command -v nmap &>/dev/null; then
-            print_message "Nmap is already installed and running... Skipping..." skip
-            continue
-        fi
+
+if vector --version &>/dev/null; then
+    print_message "Vector is already installed Skipping... !" skip
+else
+    print_message "Installing Vector..." info
+    wget https://packages.timber.io/vector/0.44.0/vector_0.44.0-1_amd64.deb
+    sudo dpkg -i vector_0.44.0-1_amd64.deb
+    rm vector_0.44.0-1_amd64.deb
+    print_message "Vector installed successfully!" success
+    print_message "Installing ZincSearch ..." info
+    wget https://github.com/zincsearch/zincsearch/releases/download/v0.4.10/zincsearch_0.4.10_Linux_x86_64.tar.gz
+    tar -xvf zincsearch_0.4.10_Linux_x86_64.tar.gz
+    sudo chmod +x zincsearch
+    sudo mv zincsearch /usr/local/bin/
+    rm zincsearch_0.4.10_Linux_x86_64.tar.gz
+    print_message " ZincSearch installed successfully!" success
 fi
 
-print_message "Installing Vector..." info
-curl --proto '=https' --tlsv1.2 -sSfL https://sh.vector.dev | bash -s -- -y
+
 
 print_message "Installing Zinc Search..." info
 
-wget https://github.com/zincsearch/zincsearch/releases/download/v0.4.10/zincsearch_0.4.10_Linux_x86_64.tar.gz
-tar -xvf zincsearch_0.4.10_Linux_x86_64.tar.gz
 
-sudo chmod +x zincsearch
-sudo mv zincsearch /usr/local/bin/
 
-CONFIG_FILE="$HOME/pkgs.ini"
+CONFIG_FILE="./pkgs.ini"
 
 # Ensure required directories exist
 mkdir -p "$CONF_DIR" "$DATA_DIR" "$LOGS_DIR"
@@ -516,8 +522,6 @@ chmod +x "$BOOT_SCRIPT"
 cp $BOOT_SCRIPT $PROD_DIR/boot.sh
 
 if [ "$RUN_SERVICES" = "y" ]; then
-    termux-wake-lock
-    termux-setup-storage
     print_message "Running services on startup..." info
     "$BOOT_SCRIPT"
     # Verify Mariadb is running
