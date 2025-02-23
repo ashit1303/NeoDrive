@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config'; // For accessing JWT secret
@@ -8,13 +8,13 @@ import { Users } from '../models/Users';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy,'jwt') {
-    constructor(private readonly configService: ConfigService,
+    constructor(@Inject() private readonly configService: ConfigService,
         // private readonly prisma: PrismaService,
         private readonly typeorm: TypeormService
     ) {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-            secretOrKey: configService.get<string>('JWT_SECRET'), // Get the secret from config
+            secretOrKey: configService.get<string>('JWT_SECRET') || 'verysupersecret', // Get the secret from config
         });
     }
 

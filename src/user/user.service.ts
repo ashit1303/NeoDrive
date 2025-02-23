@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../core/prisma/prisma.service';
 import { PageDto } from './dto';
 import { Users } from 'src/core/models/Users';
 import { TypeormService } from 'src/core/typeorm/typeorm.service';
@@ -7,7 +6,7 @@ import { HelperAndFormatter as Helper } from 'src/core/helper';
 
 @Injectable()
 export class UserService {
-    constructor(private prisma: PrismaService, private readonly typeorm:TypeormService) {}
+    constructor( private readonly typeorm:TypeormService) {}
     // async getAllUsers(page: number,pageSize:   number) {
     //     const skip = (page - 1) * pageSize; // Calculate the number of records to skip
     //     const data= await this.prisma.users.findMany({
@@ -28,7 +27,7 @@ export class UserService {
     async getAllUsers(page:PageDto) {
         const {skip,take } = Helper.getPaginate(page);
          // Calculate the number of records to skip
-        const data= await this.prisma.users.findMany({
+        const data= await this.typeorm.getRepository(Users).find({
             select: {
                 id: true,       
                 name: true,     

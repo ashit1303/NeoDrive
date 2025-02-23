@@ -7,7 +7,7 @@ export class SonicService {
   constructor(private configService: ConfigService) {
   }
   private sonicConfig = {
-    host: this.configService.get<string>('SONIC_HOST'),
+    host: this.configService.get<string>('SONIC_HOST')|| 'localhost',
     auth: this.configService.get<string>('SONIC_PASSWORD'),
     port: parseInt(this.configService.get<string>('SONIC_PORT')) || 1491,
     // port: 1491,

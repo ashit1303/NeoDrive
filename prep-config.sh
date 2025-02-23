@@ -44,7 +44,7 @@ touch "$PROD_DIR/boot.sh"
 touch ".env"
 touch "$PROD_DIR/kill.sh"
 ENV='.env'
-SQL='.initiate.sql'
+SQL='initiate.sql'
 KILL_SCRIPT="$PROD_DIR/kill.sh"
 BOOT_SCRIPT="$PROD_DIR/boot.sh"
 

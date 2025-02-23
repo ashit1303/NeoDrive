@@ -14,14 +14,16 @@ import { JwtStrategy } from './jwt.strategy';
         ConfigModule, // Make ConfigModule available here
         PassportModule,
         RedisModule,
-        JwtModule.registerAsync({
-            imports: [ConfigModule],
-            inject: [ConfigService],
-            useFactory: async (configService: ConfigService) => ({
-                secret: configService.get<string>('JWT_SECRET'),
-                signOptions: { expiresIn: '7d' },
-            }),
-        }),],
+        JwtModule
+        // .registerAsync({
+        //     imports: [ConfigModule],
+        //     inject: [ConfigService],
+        //     useFactory: async (configService: ConfigService) => ({
+        //         secret: configService.get<string>('JWT_SECRET') ||'itsecret' ,
+        //         signOptions: { expiresIn: '7d' },
+        //     }),
+        // }),
+    ],
     controllers: [AuthController],
     providers: [AuthService,JwtStrategy],
 })

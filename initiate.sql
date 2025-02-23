@@ -3,7 +3,7 @@
 # db name - neodrive username neodrive grant access for neodrive password neodriveisgenius
 
 # mysql -u root -p < init.sql
-# mysql < init.sql 
+# mariadb > init.sql 
 CREATE DATABASE IF NOT EXISTS neodrive;
 
 CREATE USER IF NOT EXISTS "neodrive"@"localhost" IDENTIFIED BY "password";
