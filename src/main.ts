@@ -25,7 +25,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseInterceptor());
   // Error standor structure while sending errors from API
   app.useGlobalFilters(new HttpExceptionFilter());
-  // log('printing env', configService.get('ENV'));
+  log('printing env', configService.get('ENV'));
   if(configService.get('ENV') === 'main'){
     log('Swagger is enabled');
     const swagConfig = new DocumentBuilder()

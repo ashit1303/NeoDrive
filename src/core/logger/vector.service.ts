@@ -9,8 +9,8 @@ export class VectorLogger implements LoggerService {
   private isConnected = false;
 
   constructor(@Inject(ConfigService) private readonly configService: ConfigService) {
-    this.vectorHost = this.configService.get<string>('VECTOR_HOST') || '127.0.0.1';
-    this.vectorPort = Number(this.configService.get<string>('VECTOR_PORT')) || 9000;
+    this.vectorHost = this.configService.get<string>('VECTOR_HOST'),// || '127.0.0.1';
+    this.vectorPort = Number(this.configService.get<string>('VECTOR_PORT')),// || 9000;
 
     this.client = new net.Socket();
     this.connectToVector();

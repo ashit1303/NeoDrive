@@ -143,7 +143,7 @@ EOF
                 echo "pkill sonic" >> "$KILL_SCRIPT"
                 echo "SONIC_HOST=\"localhost\"">> $ENV
                 echo "SONIC_PORT=\"1491\"" >> $ENV
-                echo "SONIC_PASSWORD=\"SecretPassword\"" >> $ENV
+                echo "SONIC_PASSWORD=\"$MASTER_PASSWORD\"" >> $ENV
                 cat > "$CONFIG_PATH" <<EOF
 # Sonic
 # Fast, lightweight and schema-less search backend

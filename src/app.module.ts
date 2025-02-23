@@ -27,7 +27,7 @@ log('process.env.NODE_ENV', process.env.NODE_ENV);
     isGlobal: true,  // Makes ConfigService available globally
     // envFilePath: `.env-${process.env.NODE_ENV || 'dev'}`, // Dynamically loads .env file
     cache: false,  // Caches the .env file
-    ignoreEnvFile: true,  // Ignores the .env file
+    // ignoreEnvFile: true,  // Ignores the .env file
     // envFilePath: null,
   }),
     TypeormModule, AuthModule, MailerModule, FileModule, UserModule, SonicModule, ShortenerModule

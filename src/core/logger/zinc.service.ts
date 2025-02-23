@@ -11,9 +11,9 @@ export class ZincLogger implements LoggerService {
 
   constructor(@Inject(ConfigService) private readonly configService: ConfigService) {
     this.zincUrl = this.configService.get<string>('ZINC_URL') ;//|| 'http://127.0.0.1:4080';
-    this.zincIndex = this.configService.get<string>('ZINC_INDEX');// || 'logs';
-    this.zincUsername = this.configService.get<string>('ZINC_USERNAME');// || 'admin';
-    this.zincPassword = this.configService.get<string>('ZINC_PASSWORD');// || 'Complexpass#123';
+    this.zincIndex = this.configService.get<string>('ZINC_INDEX') || 'logs';
+    this.zincUsername = this.configService.get<string>('ZINC_USER');// || 'admin';
+    this.zincPassword = this.configService.get<string>('ZINC_PASS');// || 'Complexpass#123';
   }
 
   async sendLog(level: string, message: string, context?: string | object, trace?: string) {
