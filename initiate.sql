@@ -13,7 +13,7 @@ GRANT ALL PRIVILEGES ON neodrive.* TO 'neodrive'@'%';
 CREATE USER IF NOT EXISTS "admin"@"localhost" IDENTIFIED BY "password";
 GRANT ALL PRIVILEGES ON neodrive.* TO 'admin'@'localhost';
 
-
+create database if not exists  neodrive;
 use neodrive;
 
 CREATE TABLE IF NOT EXISTS users (
