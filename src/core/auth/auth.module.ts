@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import AuthController from './auth.controller';
 import { AuthService } from './auth.service';
-import { PrismaModule } from '../prisma/prisma.module';
+// import { PrismaModule } from '../prisma/prisma.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config'; // Import ConfigModule
@@ -10,7 +10,7 @@ import { JwtStrategy } from './jwt.strategy';
 
 @Module({
     imports: [
-        PrismaModule,
+        // PrismaModule,
         ConfigModule, // Make ConfigModule available here
         PassportModule,
         RedisModule,
