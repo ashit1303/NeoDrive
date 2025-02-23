@@ -1,5 +1,25 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
+print_message() {
+    case "$2" in
+        success)
+            COLOR="\e[1;32m" # Green
+            ;;
+        fail)
+            COLOR="\e[1;31m" # Red
+            ;;
+        skip)
+            COLOR="\e[1;34m" # Blue
+            ;;
+        info)
+            COLOR="\e[1;33m" # Yellow
+            ;;
+        *)
+            COLOR="\e[0m" # Default
+            ;;
+    esac
+    echo -e "\n${COLOR}$1\e[0m\n"
+}
 
 pkg update -y  && pkg install root-repo -y && pkg upgrade -y
 
@@ -14,7 +34,7 @@ for package in figlet curl tree wget nano iptables msmtp arp-scan openssh git ng
     fi
 
     if [ "$package" = "redis" ]; then
-        if command -v redis-cli &>/dev/null; then
+        if command  redis-cli ping &>/dev/null; then
             print_message "Redis is already installed and running... Skipping..." skip
             continue
         fi

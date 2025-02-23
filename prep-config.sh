@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/bash
+#!/bin/bash
 
 print_message() {
     case "$2" in
@@ -21,57 +21,9 @@ print_message() {
     echo -e "\n${COLOR}$1\e[0m\n"
 }
 
-
-
-header() {
-    COLOR="\e[1;35m" # Purple
-    RESET="\e[0m"     # Reset color
-    cat <<EOF
-
-# Install Git
-# Install SSH
-# Install Nginx
-# Install Mailer
-# Install DUC ddns
-# Install Ollama
-# Install MongoDB
-# Install MariaDB
-# Install Nodejs
-# Install Redis
-# Install Vector
-# Install VictoriaMetrics
-# Install Zincsearch
-# Install SonicSearch
-
-# Install Afwall+ or iptables
-EOF
-    echo -e "${RESET}"
-}
-
-header
-
-
-read -rp "Do you want to use root access? (y/n): " USE_ROOT_ACCESS
-
-# Check if root access is available
-
-if [ "$USE_ROOT_ACCESS" = "y" ]; then
-    PREFIX="/data/data/com.termux/files/usr"
-else  
-    print_message "ROOT ACCESS NOT AVAILABLE" fail
-    # trap 'echo "Aborted due to an error"' 
-    # exit 1
-    # PREFIX="$HOME/.termux"
-fi
-
 read -rp "Enter master username(admin): " MASTER_USER
 read -rp "Enter master password(admin): " MASTER_PASSWORD
-read -rp "Where do you want to keep your data files 1) ~/xData 2) ~/../xData 3) ~/.termux/xData 4) ~/storage/shared/xData  5) username (1 or 2 or 3 or 4 or 5) " PROD_DIR 
-read -rp "Do you want to run services on start? (y/n): " RUN_SERVICES
-
-# Later phase
-# read -p "Do you want to build packages for latest version? (It will use built packages from repo instead) (y/n): " BUILD_PACKAGES 
-
+read -rp "Where do you want to keep your data files 1) ~/xData 2) ~/../xData 3) on username (1 or 2 or 3) " PROD_DIR 
 
 
 if [ "$PROD_DIR" = "1" ]; then
@@ -79,11 +31,6 @@ if [ "$PROD_DIR" = "1" ]; then
 elif [ "$PROD_DIR" = "2" ]; then
     PROD_DIR="$HOME/../xData"
 elif [ "$PROD_DIR" = "3" ]; then
-    PROD_DIR="$HOME/.termux/xData"
-elif [ "$PROD_DIR" = "4" ]; then
-    termux-setup-storage
-    PROD_DIR="$HOME/storage/shared/xData"
-elif [ "$PROD_DIR" = "5" ]; then
     PROD_DIR="$HOME/$MASTER_USER"
 else 
     print_message "Invalid choice" fail
@@ -93,11 +40,13 @@ fi
 # I have created a directory in $HOME
 mkdir -p "$PROD_DIR"
 
-# Create boot directory if it doesn't exist
-BOOT_DIR="$HOME/.termux/boot"
-mkdir -p "$BOOT_DIR"
-touch "$BOOT_DIR/boot.sh"
-BOOT_SCRIPT="$BOOT_DIR/boot.sh"
+touch "$PROD_DIR/boot.sh"
+touch ".env"
+touch "$PROD_DIR/kill.sh"
+ENV='.env'
+SQL='.initiate.sql'
+KILL_SCRIPT="$PROD_DIR/kill.sh"
+BOOT_SCRIPT="$PROD_DIR/boot.sh"
 
 # Create directory in $HOME/../prod
 CONF_DIR="$PROD_DIR/conf"
@@ -108,100 +57,10 @@ mkdir -p "$CONF_DIR"
 mkdir -p "$LOGS_DIR"
 
 # Store all responses in a file inside the created directory
-RESPONSE_FILE="$PROD_DIR/termux-prep.conf"
+RESPONSE_FILE="$PROD_DIR/initiate.conf"
 rm -f "$RESPONSE_FILE"
 touch "$RESPONSE_FILE"
 exec > >(tee -a "$RESPONSE_FILE") 2>&1
-
-print_message "Setting up termux..." info
-
-print_message "Updating and upgrading packages..." info
-
-pkg update -y && pkg upgrade -y
-
-if [ "$USE_ROOT_ACCESS" = "y" ]; then
-    pkg install root-repo -y && pkg update -y
-    
-    for package in iproute2 nmap arp-scan tsu; do
-        if command -v "$package" &>/dev/null; then
-            print_message "$package is already installed... Skipping..." skip
-            continue
-        fi
-
-        if [ "$package" = "iproute2" ]; then
-            if command -v ip &>/dev/null; then
-                print_message "iproute2 is already installed and running... Skipping..." skip
-                continue
-            fi
-        elif [ "$package" = "nmap" ]; then
-            if command -v nmap &>/dev/null; then
-                print_message "Nmap is already installed and running... Skipping..." skip
-                continue
-            fi
-        fi
-
-        print_message "$package is not installed, installing..." info
-        if pkg install "$package" -y; then
-            print_message "$package installed successfully!" success
-        else
-            print_message "Failed to install $package" fail
-        fi
-    done
-fi
-
-print_message "Installing necessary packages..." info
-
-# pkg install tsu figlet openssh git curl tree wget nano nodejs termux-services iptables iproute2 nmap nginx arp-scan mariadb -y
-for package in figlet curl tree wget nano iptables msmtp arp-scan openssh git nginx nodejs mariadb redis; do
-    if command -v "$package" &>/dev/null; then
-        print_message "$package is already installed... Skipping..." skip
-        continue
-    fi
-
-    if [ "$package" = "redis" ]; then
-        if command -v redis-cli &>/dev/null; then
-            print_message "Redis is already installed and running... Skipping..." skip
-            continue
-        fi
-    elif [ "$package" = "mariadb-server" ]; then
-        if command --version mariadb &>/dev/null; then
-            print_message "OpenSSH is already installed Skipping..." skip
-            continue
-        fi
-    elif [ "$package" = "openssh" ]; then
-        if command -v sshd &>/dev/null; then
-            print_message "OpenSSH is already installed and running... Skipping..." skip
-            continue
-        fi
-    elif [ "$package" = "nodejs" ]; then
-        if command -v node &>/dev/null; then
-            print_message "Node.js is already installed and running... Skipping..." skip
-            continue
-        fi
-    fi
-
-    print_message "$package is not installed, installing..." info
-    if pkg install "$package" -y; then
-        print_message "$package installed successfully!" success
-    else
-        print_message "Failed to install $package" fail
-    fi
-done
-
-
-echo "figlet -f slant 'Termux'" >> ~/.bashrc
-echo 'PS1='\''\[\e[1;32m\]\u@\h:\[\e[0m\]\[\e[1;34m\]$(if [[ "$PWD" == "$HOME" ]]; then echo "~"; else echo "~${PWD#$HOME/}"; fi)\[\e[0m\]\$ '\'' ' >> ~/.bashrc
-
-# Download and extract the archive
-curl -L https://github.com/ashit1303/bash_scripts/releases/download/v1.0/aarch64.tar.xz -o aarch64.tar.xz
-tar -xf aarch64.tar.xz
-chmod +x aarch64/*
-# Move all extracted files to $PREFIX/bin
-mv -n aarch64/* "$PREFIX"/bin/
-
-# Clean up
-rm -rf aarch64 aarch64.tar.xz
-
 
 CONFIG_FILE="./pkgs.ini"
 
@@ -248,6 +107,11 @@ update_configs() {
                 # start fresh
                 mysql_install_db --datadir=$DATA_PATH
                 echo "mariadbd-safe --datadir=$DATA_PATH --log-error=$LOGS_PATH/error.log &" >> "$BOOT_SCRIPT"
+                echo "pkill mariadb" >> "$KILL_SCRIPT"
+                echo "MYSQL_URL=mysql://$MASTER_USER:$MASTER_PASSWORD@localhost:3306/neodrive" >>$ENV
+                echo "CREATE USER IF NOT EXISTS \"$MASTER_USER\"@\"localhost\" IDENTIFIED BY \"$MASTER_PASSWORD\" ; " >> $SQL 
+                echo "GRANT ALL PRIVILEGES ON neodrive.* TO '$MASTER_USER'@'localhost' ; " >>$SQL                
+                
                 cat > "$CONFIG_PATH" <<EOF
 [mysqld]
 # Basic Settings
@@ -265,8 +129,13 @@ EOF
 
             if [ "$PACKAGE" = "sonicsearch" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.cfg"
+                
                 # insert into boot script
-                echo "sonic --config $CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT" 
+                echo "sonic --config $CONFIG_PATH >> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT" 
+                echo "pkill sonic" >> "$KILL_SCRIPT"
+                echo "SONIC_HOST=\"localhost\"">> $ENV
+                echo "SONIC_PORT=\"1491\"" >> $ENV
+                echo "SONIC_PASSWORD=\"SecretPassword\"" >> $ENV
                 cat > "$CONFIG_PATH" <<EOF
 # Sonic
 # Fast, lightweight and schema-less search backend
@@ -327,6 +196,8 @@ EOF
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.conf"
                 # insert into boot script
                 echo "nginx -c $CONFIG_PATH &" >> "$BOOT_SCRIPT"
+                echo "pkill nginx" >> "$KILL_SCRIPT"
+
                 cat > "$CONFIG_PATH" <<EOF
 # Nginx
 # nginx -c config.cfg
@@ -393,6 +264,11 @@ EOF
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.conf"
                 # insert into boot script
                 echo "redis-server $CONFIG_PATH" >> "$BOOT_SCRIPT"
+                echo "pkill redis" >> "$KILL_SCRIPT"
+                echo "REDIS_URL=\"redis://localhost:$PORT\"" >> $ENV
+                echo "REDIS_HOST=\"localhost\"" >> $ENV
+                echo "REDIS_PORT=\"$PORT\"" >> $ENV
+
                 cat > "$CONFIG_PATH" <<EOF
 # Redis
 # redis-server config.cfg
@@ -455,7 +331,11 @@ EOF
             if [ "$PACKAGE" = "vector" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.yaml"
                 # insert into boot script
+                echo "VECTOR_HOST=\"$BIND_IP\"" >>$ENV
+                echo "VECTOR_PORT=\"$PORT\"" >>$ENV
+
                 echo "vector --config $CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT"
+                echo "pkill vector" >> "$KILL_SCRIPT"
                 cat > "$CONFIG_PATH" <<EOF
 # Vector
 
@@ -498,6 +378,7 @@ EOF
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.yml"
                 # insert into boot script
                 echo "victoria-metrics -storageDataPath $DATA_PATH -retentionPeriod=12 -maxConcurrentInserts=16 -search.maxQueryDuration=1m -httpListenAddr=:$PORT  > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT"
+                echo "pkill victoria-metrics" >> "$KILL_SCRIPT"
 
                 cat > "$CONFIG_PATH" <<EOF
 victoria-metrics -storageDataPath $DATA_PATH -retentionPeriod=12 -maxConcurrentInserts=16 -search.maxQueryDuration=1m -httpListenAddr=:$PORT
@@ -507,7 +388,11 @@ EOF
             if [ "$PACKAGE" = "zincsearch" ]; then
                 CONFIG_PATH="$CONF_DIR/$PACKAGE.yaml"
                 # insert into boot script
+                
                 echo "ZINC_FIRST_ADMIN_USER=$MASTER_USER ZINC_FIRST_ADMIN_PASSWORD=$MASTER_PASSWORD zincsearch --config $CONFIG_PATH > /dev/null 2>> $LOGS_PATH/$PACKAGE.log & " >> "$BOOT_SCRIPT"
+                echo "ZINC_URL=\"http://127.0.0.1:$PORT\"" >>$ENV
+                echo "ZINC_USER=\"$MASTER_USER\"" >> $ENV
+                echo "ZINC_PASS=\"$MASTER_PASSWORD\"">> $ENV
                 cat > "$CONFIG_PATH" <<EOF
 # ZincSearch
 # zincsearch --config config.yaml
@@ -546,82 +431,19 @@ EOF
 
     done 
 }
+echo "pkill noip-duc" >> "$KILL_SCRIPT"
+
 echo "noip-duc -u tv9dbj8 -p KaXQQxRhBzxs -g all.ddnskey.com > /dev/null 2>> $LOGS_DIR/noip.log & " >> "$BOOT_SCRIPT"
+
 update_configs
+
+echo "figlet -f slant 'Termux'" >> ~/.bashrc
 
 
 chmod +x "$BOOT_SCRIPT"
 # cp $BOOT_SCRIPT $PROD_DIR/boot.sh
 
-if [ "$RUN_SERVICES" = "y" ]; then
-    termux-wake-lock
-    termux-setup-storage
-    print_message "Running services on startup..." info
-    "$BOOT_SCRIPT"
-    # Verify Mariadb is running
-print_message "Verifying Mariadb is running..." info
-if mariadb-admin ping &>/dev/null; then
-    echo "Mariadb is running successfully!" success
-    mariadb <
-else
-    echo "Mariadb failed to start. Check the script and logs." fail
-fi
 
-
-# Verify Zincsearch is running
-print_message "Verifying Zincsearch is running..." info
-if zincsearch --version &>/dev/null; then
-    print_message "Zincsearch is running successfully!" success
-else
-    print_message "Zincsearch failed to start. Check the script and logs." fail
-fi
-
-
-# Verify Ollama is running
-print_message "Verifying Ollama is running..." info
-if ollama --version &>/dev/null; then
-    print_message "Ollama is running successfully!" success
-else
-    print_message "Ollama failed to start. Check the script and logs." fail
-fi
-
-
-# Verify Nginx is running
-print_message "Verifying Nginx is running..." info
-if nginx -v &>/dev/null; then
-    print_message "Nginx is running successfully!" success
-else
-    print_message "Nginx failed to start. Check the script and logs." fail
-fi
-
-
-# Verify Redis is running
-print_message "Verifying Redis is running..." info
-if redis-cli ping &>/dev/null; then
-    print_message "Redis is running successfully!" success
-else
-    print_message "Redis failed to start. Check the script and logs." fail
-fi
-
-
-# Verify Vector is running
-print_message "Verifying Vector is running..." info
-if vector --version &>/dev/null; then
-    print_message "Vector is running successfully!" success
-else
-    print_message "Vector failed to start. Check the script and logs." fail
-fi
-
-
-# Verify Sonic is running
-print_message "Verifying Sonic is running..." info
-if sonic --version &>/dev/null; then
-    print_message "Sonic is running successfully!"
-else
-    print_message "Sonic failed to start. Check the script and logs."
-fi
-
-fi
 
 # Pending tasks 
 # Hold liftbridge and fluent bit
@@ -646,4 +468,4 @@ fi
 # sudo nmap -sS -p- 192.168.97.47
 # exposing 3306 & 4080 port if root access avaialable
 
-print_message "Setup complete! Reboot your device to confirm automatic startup." info
+print_message "Configuration completed." info
