@@ -1,11 +1,12 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, Req, UseGuards, UsePipes } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { LoginReqDTO,  LoginResDTO } from './auth.schema';
+import { LoginReqDTO,  LoginResDTO, RegisterResDTO, TokenDTO } from './auth.schema';
 import { JoiValidate } from "../joi/joi.service";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 // import joiToSwagger from "joi-to-swagger";
 import { StandardErrorResponse } from "../http-exception.filter";
 import { AuthGuard } from "@nestjs/passport";
+import { BaseResponse } from "../response.interceptor";
 
 
 // const { swagger: loginReqSwagger } = joiToSwagger(loginReq);
@@ -19,9 +20,9 @@ export class AuthController {
     @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ summary: 'Register' })
     @ApiBody({ type :LoginReqDTO })
-    @ApiResponse({ status: 201, description: 'User registered successfully',  })
+    @ApiResponse({ status: 201, description: 'User registered successfully', type: RegisterResDTO  })
     @ApiResponse({ status: 400, description: 'Bad Request. Validation failed',type: StandardErrorResponse })
-    async registerUser( @Body() dto ) {
+    async registerUser( @Body() dto : LoginReqDTO) {
         const data = await this.authService.register(dto);
         return data;
     }

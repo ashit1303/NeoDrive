@@ -1,9 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { ShortendLink } from "./ShortendLink";
+import { Files } from "./Files";
 
 @Entity("users", { schema: "neodrive" })
 export class Users {
   @PrimaryGeneratedColumn({ type: "bigint", name: "id", unsigned: true })
-  public id: number;
+  public id: string;
 
   @Column("varchar", { name: "email", length: 63 })
   public email: string;
@@ -38,4 +40,10 @@ export class Users {
     default: () => "CURRENT_TIMESTAMP",
   })
   public updatedAt: Date | null;
+
+  @OneToMany(() => ShortendLink, (shortendLink) => shortendLink.createdBy2)
+  public shortendLinks: ShortendLink[];
+
+  @OneToMany(() => Files, (files) => files.createdBy2)
+  public files: Files[];
 }

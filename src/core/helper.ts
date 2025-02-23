@@ -1,6 +1,10 @@
+import * as fs from 'fs'
+import * as crypto from 'crypto';
+import { ShortCodeDTO } from 'src/shortener/dto';
+import { PageDto } from 'src/user/dto';
 
 export class HelperAndFormatter {
-  public static generateShortCode(): string {
+  public static generateShortCode(): ShortCodeDTO {
     const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
     const parts = [];
     for (let i = 0; i < 3; i++) {
@@ -10,8 +14,19 @@ export class HelperAndFormatter {
         }
         parts.push(part);
     }
-    return parts.join('-');
-}
+    return{shortCode: parts.join('-')}
+  }
+  public static getPaginate(page:PageDto) {
+    const skip = (page.page - 1) * page.pageSize;
+    const take = parseInt(page.pageSize.toString())
+    return {skip,take}
+  }
+  public static generateSHA(filePath: string): string {
+    const fileBuffer = fs.readFileSync(filePath);
+    const hashSum = crypto.createHash('sha256');
+    hashSum.update(fileBuffer);
+    return hashSum.digest('hex');
+  }
   public static formatName(name: string): string {
       let userName = name.replace(/[^a-zA-Z0-9\s]/g, '').trim();
       const titles = [ "Mr.", "Mr ", "MR.", "Ms.", "MS.", "MRS.", "Mrs.", "MISS.", "Miss" ];

@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../core/prisma/prisma.service';
 import { PageDto } from './dto';
+import { Users } from 'src/core/models/Users';
+import { TypeormService } from 'src/core/typeorm/typeorm.service';
+import { HelperAndFormatter as Helper } from 'src/core/helper';
 
 @Injectable()
 export class UserService {
-    constructor(private prisma: PrismaService) {}
+    constructor(private prisma: PrismaService, private readonly typeorm:TypeormService) {}
     // async getAllUsers(page: number,pageSize:   number) {
     //     const skip = (page - 1) * pageSize; // Calculate the number of records to skip
     //     const data= await this.prisma.users.findMany({
@@ -23,7 +26,8 @@ export class UserService {
     //     return data[0];
     // }
     async getAllUsers(page:PageDto) {
-        const skip = (page.page - 1) * page.pageSize; // Calculate the number of records to skip
+        const {skip,take } = Helper.getPaginate(page);
+         // Calculate the number of records to skip
         const data= await this.prisma.users.findMany({
             select: {
                 id: true,       
@@ -34,16 +38,15 @@ export class UserService {
             // orderBy: {
             //     createdAt: 'desc', 
             // },
-            skip: skip,
-            take: page.pageSize,
+            skip,take
         });
 
-        return data[0];
+        return data;
     }
 
 
-    async getMyProfile(id: number){
-        const myInfo= await this.prisma.users.findFirst({ where:{id:id}})
+    async getMyProfile(id: string){
+        const myInfo= await this.typeorm.getRepository(Users).findOne({ where: { id } });
         delete myInfo.password
         return myInfo;
     }

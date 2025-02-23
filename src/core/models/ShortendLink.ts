@@ -1,6 +1,16 @@
-import { Column, Entity, Index, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
+import { Users } from "./Users";
 
-@Index("short_code", ["shortCode"], { unique: true })
+@Index("idx_short_code", ["shortCode"], { unique: true })
+@Index("IDX_893225572831d7cc86302f28a6", ["shortCode"], { unique: true })
+@Index("shortend_link_users_id_fk", ["createdBy"], {})
 @Entity("shortend_link", { schema: "neodrive" })
 export class ShortendLink {
   @PrimaryGeneratedColumn({ type: "bigint", name: "id", unsigned: true })
@@ -15,8 +25,8 @@ export class ShortendLink {
   @Column("int", { name: "access_count", nullable: true, default: () => "'0'" })
   public accessCount: number | null;
 
-  @Column("int", { name: "created_by", nullable: true, unsigned: true })
-  public createdBy: number | null;
+  @Column("bigint", { name: "created_by", nullable: true, unsigned: true })
+  public createdBy: string | null;
 
   @Column("timestamp", {
     name: "created_at",
@@ -31,4 +41,11 @@ export class ShortendLink {
     default: () => "CURRENT_TIMESTAMP",
   })
   public updatedAt: Date | null;
+
+  @ManyToOne(() => Users, (users) => users.shortendLinks, {
+    onDelete: "RESTRICT",
+    onUpdate: "RESTRICT",
+  })
+  @JoinColumn([{ name: "created_by", referencedColumnName: "id" }])
+  public createdBy2: Users;
 }

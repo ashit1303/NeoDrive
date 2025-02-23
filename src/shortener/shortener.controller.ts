@@ -20,13 +20,13 @@ export class ShortenerController {
     private readonly shortenerService: ShortenerService,
   ) {}
 
-  @Get('/redirect')
+  @Get('/s/:shortValue')
   @ApiParam({ name: 'shortValue', example: 'aaa-aaa-aaa' })
   @ApiOperation({ summary: 'Redirect to original URL' })
   @ApiResponse({ status: 200, description: 'Redirecting to original URL', type: ShortendLinkDTO}, )
   async redirectToUrl(@Query('shortValue') shortValue: string, @Res() res: Response) {
     const data =  await this.shortenerService.fetchUrl(shortValue);
-  return res.redirect(data);
+    return res.redirect(data);
   }
 
   @Get('/is-available')
@@ -63,7 +63,7 @@ export class ShortenerController {
   @ApiNotFoundResponse({ description: 'Not Found', type: StandardErrorResponse})
   async createShortUrlByGuest( @Query('originalUrl') originalUrl: string) {
     const shortCode = Helper.generateShortCode();
-    const data = await this.shortenerService.createShortUrl(shortCode, originalUrl);
+    const data = await this.shortenerService.createShortUrl(shortCode.shortCode, originalUrl);
     
     return {added: data, shortCode: shortCode};
   }

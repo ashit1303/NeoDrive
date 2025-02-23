@@ -2,7 +2,7 @@ import { Controller, Get, ParseIntPipe, Query, Req, UseGuards } from '@nestjs/co
 import { UserService } from './user.service';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 // import { JoiValidate } from '../core/joi/joi.service';
-import { PageDto ,RequestWithUser} from './dto';
+import { AllUserResDTO, AuthenticatedReqDTO, PageDto, UserResDTO} from './dto';
 // import joiToSwagger from 'joi-to-swagger';
 import { StandardErrorResponse } from '../core/http-exception.filter';
 import { JwtGaurd } from 'src/core/auth/gaurd';
@@ -35,9 +35,9 @@ export class UserController {
 
     @Get()
     @ApiOperation({ summary: 'Get all users' })
-    @ApiQuery({ type: PageDto })
+    // @ApiQuery({ type: PageDto })
     @UseGuards(JwtGaurd)
-    @ApiResponse({ status: 200, description: 'Get all users' })
+    @ApiResponse({ status: 200, description: 'Get all users', type: AllUserResDTO })
     @ApiResponse({ status: 400, description: 'Bad Request. Validation failed', type: StandardErrorResponse })
     // @UsePipes()
     async getAllUsers(
@@ -50,11 +50,10 @@ export class UserController {
 
     @Get('me')
     @ApiOperation({ summary: 'Get user by Id' })
-    // @ApiParam({ name: 'id', required: true, description: 'User Id' })
-    @ApiResponse({ status: 200, description: 'Get user by Id' })
-    // @UsePipes()
+    @ApiResponse({ status: 200, description: 'Get user by Id', type: UserResDTO  })
+    @ApiResponse({ status: 400, description: 'Bad Request. Validation failed', type: StandardErrorResponse })
     @UseGuards(JwtGaurd)
-    async getMyProfile(@Req() req: RequestWithUser) {
+    async getMyProfile(@Req() req: AuthenticatedReqDTO) {
         return await this.userService.getMyProfile(req.user.id);
     }
 

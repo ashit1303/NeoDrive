@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, Matches, Min, MinLength } from 'class-validator';
 import * as Joi from 'joi';
+import { BaseResponse } from '../response.interceptor';
 
 // export const loginReq = Joi.object({
 //     email: Joi.string().email().description('User email').example('exp@any.com'),
@@ -19,13 +20,24 @@ export class LoginReqDTO { // For type safety
     password: string;
 }
 
-export class LoginResDTO {
+export class TokenDTO {
     @ApiProperty({ description: 'User token' })
     token: string;
 }
 
+export class LoginResDTO extends BaseResponse<TokenDTO>{
+    @ApiProperty({ description: 'Payload', type: 'object', properties: { token: { type: 'string', example: 'xxxxxxx' }}})
+    data: {token:string}
+}
+
+
+export class RegisterResDTO extends BaseResponse<object>{
+    @ApiProperty({ description: 'Payload', type: 'object', properties: { success: { type: 'boolean', example: true }, message: { type : 'string', example :'User registered successfully'}}})
+    data: {success: boolean, message : string}
+}
+
 export class authPayloadDTO{
-    id : number;
+    id : string;
     username:string;
     email:string;
     

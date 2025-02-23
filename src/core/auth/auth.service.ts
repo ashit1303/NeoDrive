@@ -15,6 +15,17 @@ export class AuthService {
         private readonly redisService: RedisService,
         private jwtService: JwtService,
     ) { }
+    private async signToken(payload: authPayloadDTO) {
+        try {
+            const token = await this.jwtService.signAsync(payload, {
+                expiresIn: '7d',
+                secret: process.env.JWT_SECRET,
+            });
+            return { access_token: token };
+        } catch (error) {
+            throw new BadRequestException('Token signing failed');
+        }
+    }
 
     async login(cred: LoginReqDTO) {
         const user = await this.typeorm.getRepository(Users).findOne({ where: { email: cred.email } });
@@ -32,36 +43,10 @@ export class AuthService {
         }
 
         const payload = { id: user.id, username: user.username, email:user.email };
-        // delete user.password;
-
-        //  await this.typeorm.getRepository(User).findFirst({
-        //     where: { email: cred.email },
-        // });
-        // async findOne(id: number): Promise<User> {
-        //     return this.typeorm.getRepository(User).findOne({ where: { id } });
-        // }
-
-        // async create(user: Partial<User>): Promise<User> {
-        //     const userRepo = this.typeorm.getRepository(User);
-        //     const newUser = userRepo.create(user);
-        //     return userRepo.save(newUser);
-        // }
         try {
-            return await this.signToken(payload);
+            return (await this.signToken(payload)).access_token;
         } catch (error) {
             throw new BadRequestException('Token generation failed');
-        }
-    }
-
-    async signToken(payload: authPayloadDTO) {
-        try {
-            const token = await this.jwtService.signAsync(payload, {
-                expiresIn: '7d',
-                secret: process.env.JWT_SECRET,
-            });
-            return { access_token: token };
-        } catch (error) {
-            throw new BadRequestException('Token signing failed');
         }
     }
 

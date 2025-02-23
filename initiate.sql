@@ -27,27 +27,37 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS shortend_link (
-    id SERIAL PRIMARY KEY,
-    original_url VARCHAR(255) NOT NULL,
-    short_code VARCHAR(20) UNIQUE NOT NULL,  -- Unique short code
-    access_count INT DEFAULT 0,             -- Number of times accessed
-    created_by INT unsigned default null ,                         -- ID of the user who created it (FK)
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Timestamp of creation
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP -- Timestamp of last update
-    -- FOREIGN KEY (created_by) REFERENCES users(id) -- Assuming you have a Users table
+-- insert into users (email, name, username, password, is_verified) values ('', 'Admin', 'admin', 'password', 1);
+CREATE TABLE IF NOT EXISTS shortend_link 
+(
+    id           bigint unsigned auto_increment
+        primary key,
+    original_url varchar(255)                          not null,
+    short_code   varchar(20)                           not null,
+    access_count int       default 0                   null,
+    created_by   bigint unsigned                       null,
+    created_at   timestamp default current_timestamp() null,
+    updated_at   timestamp default current_timestamp() null on update current_timestamp(),
+    constraint idx_short_code
+        unique (short_code),
+    constraint shortend_link_users_id_fk
+        foreign key (created_by) references users (id)
 );
 
 CREATE TABLE IF NOT EXISTS files
 (
-    id       SERIAL
+    id         bigint unsigned auto_increment
         primary key,
-    file_name     varchar(127)                                not null,
-    file_size     bigint unsigned default 0                   not null,
-    file_sha      varchar(64)                                 not null,
-    file_path varchar(255)                                not null,
+    file_name  varchar(127)                                not null,
+    file_size  bigint unsigned default 0                   not null,
+    file_sha   varchar(64)                                 not null,
+    file_path  varchar(255)                                not null,
+    created_by bigint unsigned                             null,
     created_at timestamp       default current_timestamp() null,
-    updated_at timestamp                                   null on update current_timestamp(),
-    constraint file_sha
-        unique (file_sha)
+    updated_at timestamp       default current_timestamp() null on update current_timestamp(),
+    constraint idx_file_sha
+        unique (file_sha),
+    constraint files_users__fk
+        foreign key (created_by) references users (id)
 );
+

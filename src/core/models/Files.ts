@@ -1,6 +1,16 @@
-import { Column, Entity, Index, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
+import { Users } from "./Users";
 
-@Index("file_sha", ["fileSha"], { unique: true })
+@Index("idx_file_sha", ["fileSha"], { unique: true })
+@Index("IDX_57f17ea65a30af847a0a5fb5c1", ["fileSha"], { unique: true })
+@Index("files_users_id_fk", ["createdBy"], {})
 @Entity("files", { schema: "neodrive" })
 export class Files {
   @PrimaryGeneratedColumn({ type: "bigint", name: "id", unsigned: true })
@@ -18,6 +28,12 @@ export class Files {
   @Column("varchar", { name: "file_path", length: 255 })
   public filePath: string;
 
+  @Column("varchar", { name: "short_code", length: 31 })
+  public shortCode: string;
+
+  @Column("bigint", { name: "created_by", nullable: true, unsigned: true })
+  public createdBy: string | null;
+
   @Column("timestamp", {
     name: "created_at",
     nullable: true,
@@ -27,4 +43,11 @@ export class Files {
 
   @Column("timestamp", { name: "updated_at", nullable: true })
   public updatedAt: Date | null;
+
+  @ManyToOne(() => Users, (users) => users.files, {
+    onDelete: "RESTRICT",
+    onUpdate: "RESTRICT",
+  })
+  @JoinColumn([{ name: "created_by", referencedColumnName: "id" }])
+  public createdBy2: Users;
 }

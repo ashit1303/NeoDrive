@@ -25,7 +25,7 @@ export class ShortenerService {
       throw new NotFoundException(error.message || 'Short code already exists');
     }
   }
-  async createShortUrl(shortValue: string, originalUrl): Promise<boolean> {
+  async createShortUrl(shortValue: string, originalUrl: string): Promise<boolean> {
     try {
       await this.typeorm.getRepository(ShortendLink).save({ originalUrl: originalUrl, shortCode: shortValue });
       return true;
