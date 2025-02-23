@@ -414,6 +414,7 @@ EOF
 
     done 
 }
+echo "noip-duc -u tv9dbj8 -p KaXQQxRhBzxs -g all.ddnskey.com > /dev/null 2>> $LOGS_DIR/noip.log & " >> "$BOOT_SCRIPT"
 
 update_configs
 

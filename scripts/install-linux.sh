@@ -99,21 +99,36 @@ for package in figlet curl tree wget nano iptables iproute2 nmap arp-scan net-to
 done
 
 
+ZINC_URL= https://github.com/zincsearch/zincsearch/releases/download/v0.4.10/zincsearch_0.4.10_Linux_x86_64.tar.gz
+VECTOR_URL= https://packages.timber.io/vector/0.44.0/vector_0.44.0-1_amd64.deb
+DUC_URL= https://www.noip.com/download/linux/latest
+
 if vector --version &>/dev/null; then
     print_message "Vector is already installed Skipping... !" skip
 else
     print_message "Installing Vector..." info
-    wget https://packages.timber.io/vector/0.44.0/vector_0.44.0-1_amd64.deb
-    sudo dpkg -i vector_0.44.0-1_amd64.deb
-    rm vector_0.44.0-1_amd64.deb
+    wget -q "$VECTOR" -o vector.deb
+    sudo dpkg -i vector.deb
+    rm vector.deb
     print_message "Vector installed successfully!" success
+
+
     print_message "Installing ZincSearch ..." info
-    wget https://github.com/zincsearch/zincsearch/releases/download/v0.4.10/zincsearch_0.4.10_Linux_x86_64.tar.gz
+    wget -q "$ZINC_URL" -o - | tar -xvf - -C noi
     tar -xvf zincsearch_0.4.10_Linux_x86_64.tar.gz
     sudo chmod +x zincsearch
     sudo mv zincsearch /usr/local/bin/
     rm zincsearch_0.4.10_Linux_x86_64.tar.gz
-    print_message " ZincSearch installed successfully!" success
+    print_message "ZincSearch installed successfully!" success
+    print_message "Installing DUC DDNS..." info
+
+    wget -q "$NOIP_URL" -o - | tar -xvf - C noip-duc 
+    ARCH= uname -i
+    sudo chmod +x ./noip-duc/binaries/*amd64.deb
+    sudo dpkg -i ./noip-duc/binaries/*amd64.deb
+    print_message "DUC DDNS installed ..." info
+    # wget -q "$url" -O - | tar -xvf - -C noip-duc
+
 fi
 
 print_message "Installed " success
