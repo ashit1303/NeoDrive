@@ -64,6 +64,14 @@ exec > >(tee -a "$RESPONSE_FILE") 2>&1
 
 CONFIG_FILE="./pkgs.ini"
 
+cat > "$ENV" <<EOF
+DOMAIN="localhost"
+PORT="3000"
+ENV="main"
+JWT_SECRET="verysupersecret" 
+LOG_LEVEL="info" 
+EOF
+
 # Ensure required directories exist
 mkdir -p "$CONF_DIR" "$DATA_DIR" "$LOGS_DIR"
 
