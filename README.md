@@ -16,6 +16,9 @@ Check out a few resources that may come in handy when working with NestJS:
 - Visit [Vector](https://vector.dev/) 
 - Visit [VictoriaMetrics](https://github.com/VictoriaMetrics/) 
 - Visit [SonicSearch](https://github.com/valeriansaliou/sonic) 
+- Visit [Liftbridge](https://github.com/LiftbridgeIO/liftbridge)
+- Visit [MongoDB](https://www.mongodb.com/) 
+- Visit [GraphQl](https://graphql.org/)
 - [MongoDB](Under development) 
 - [GraphQl](Under development) 
 - [Mailer](Under development)
@@ -27,7 +30,7 @@ Check out a few resources that may come in handy when working with NestJS:
 - LinkShortener
 - FileUploader
 - Leetcode Problem Solver
-
+- Liftbridge Integration
 ## Install core package
 
 ```bash

@@ -2,7 +2,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './core/auth/auth.module';
-import { PrismaService } from './core/prisma/prisma.service';
+// import { PrismaService } from './core/prisma/prisma.service';
 import { MailerModule } from './core/mailer/mailer.module';
 import { FileModule } from './file/file.module';
 import { SonicService } from './core/sonic/sonic.service';
@@ -33,7 +33,7 @@ log('process.env.NODE_ENV', process.env.NODE_ENV);
     TypeormModule, AuthModule, MailerModule, FileModule, UserModule, SonicModule, ShortenerModule
   ],
   controllers: [AppController, AuthController],
-  providers: [AppService, AuthService, PrismaService, SonicService, JwtService, RedisService, RedisConfigService, ConfigService,  ZincLogger],
+  providers: [AppService, AuthService, SonicService, JwtService, RedisService, RedisConfigService, ConfigService,  ZincLogger],
 })
 
 export class AppModule implements NestModule {

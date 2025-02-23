@@ -1,5 +1,5 @@
 import { Injectable, Query } from '@nestjs/common';
-import { PrismaService } from '../core/prisma/prisma.service';
+// import { PrismaService } from '../core/prisma/prisma.service';
 import * as fs from 'fs';
 import { HelperAndFormatter as Helper } from 'src/core/helper';
 
@@ -13,7 +13,9 @@ import { Files } from 'src/core/models/Files';
 
 @Injectable()
 export class FileService {
-  constructor(private prisma: PrismaService, private sonicService: SonicService,
+  constructor(
+    // private prisma: PrismaService, 
+    private sonicService: SonicService,
     private typeorm: TypeormService,
   ) {}
   
@@ -28,7 +30,8 @@ export class FileService {
     const shortCode = Helper.generateShortCode()
 
     // Check for duplicate files
-    const existingFile = await this.prisma.files.findUnique({ where: { file_sha:shaHash } });
+    // const existingFile = await this.prisma.files.findUnique({ where: { file_sha:shaHash } });
+    const existingFile = await this.typeorm.getRepository(Files).findOne({ where: { fileSha:shaHash } });
     // create short code and save 
     if (existingFile) {
       fs.unlinkSync(filePath); // Delete duplicate file
@@ -36,8 +39,12 @@ export class FileService {
     }
 
     // Save file metadata to database
-    const newFile = await this.prisma.files.create({
-      data: { file_name: fileName, file_sha: shaHash,  file_path: filePath, file_size: fileSize, short_code:shortCode.shortCode },
+    const newFile = this.typeorm.getRepository(Files).create({
+      fileName: fileName,
+      fileSha: shaHash,
+      filePath: filePath,
+      fileSize: fileSize.toString(),
+      shortCode: shortCode.shortCode
     });
 
     return { success:true, message: 'File uploaded successfully', data: shaHash };
@@ -52,15 +59,19 @@ export class FileService {
     const shaHash = Helper.generateSHA(filePath);
 
     // Check for duplicate files
-    const existingFile = await this.prisma.files.findUnique({ where: { file_sha:shaHash } });
+    const existingFile = await this.typeorm.getRepository(Files).findOne({ where: { fileSha:shaHash } });
     // create short code and save 
     if (existingFile) {
       fs.unlinkSync(filePath); // Delete duplicate file
       throw new Error('Duplicate file detected');
     }
     // Save file metadata to database
-    const newFile = await this.prisma.files.create({
-      data: { file_name: fileName, file_sha: shaHash,  file_path: filePath, file_size: fileSize, short_code: shortCode },
+    const newFile = this.typeorm.getRepository(Files).create({
+      fileName: fileName,
+      fileSha: shaHash,
+      filePath: filePath,
+      fileSize: fileSize.toString(),
+      shortCode: shortCode
     });
 
     return { success:true, message: 'File uploaded successfully', data: shaHash };
