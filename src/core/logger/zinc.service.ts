@@ -8,23 +8,25 @@ export class ZincLogger implements LoggerService {
   private zincIndex: string;
   private zincUsername: string;
   private zincPassword: string;
+  private createdIndex: boolean;
 
   constructor(@Inject(ConfigService) private readonly configService: ConfigService) {
     this.zincUrl = this.configService.get<string>('ZINC_URL') ;//|| 'http://127.0.0.1:4080';
     this.zincIndex = this.configService.get<string>('ZINC_INDEX') || 'logs';
     this.zincUsername = this.configService.get<string>('ZINC_USER');// || 'admin';
     this.zincPassword = this.configService.get<string>('ZINC_PASS');// || 'Complexpass#123';
+    this.createdIndex = false;
   }
+    // @TODO: RUN THIS FOR THE FIRST TIME FOR CREATING INDEX 
+  async createIndex() {
+    await axios.post(`${this.zincUrl}/api/index/error`),{"name":"error","storage_type":"disk","settings":{},"mappings":{}},{auth: { username: this.zincUsername, password: this.zincPassword }, headers: { 'Content-Type': 'application/json' },};
+    await axios.post(`${this.zincUrl}/api/index/logs`),{"name":"logs","storage_type":"disk","settings":{},"mappings":{}},{auth: { username: this.zincUsername, password: this.zincPassword }, headers: { 'Content-Type': 'application/json' },};
+    this.createdIndex= true;
+  }
+  // this.createIndex();
 
+  //create logs and error in zincsearch
   async sendLog(level: string, message: string, context?: string | object, trace?: string) {
-    // const flattenedContext = context
-    //   ? typeof context === 'object'
-    //     ? Object.entries(context).reduce((acc, [key, value]) => {
-    //         acc[key] = value;
-    //         return acc;
-    //       }, {})
-    //     : { context }
-    //   : undefined;
     const flattenedContext = context
     ? typeof context === 'object'
       ? context
@@ -48,6 +50,9 @@ export class ZincLogger implements LoggerService {
       }
     );
   } catch (error) {
+    if(this.createdIndex == false){
+    this.createIndex().catch();
+    }
     console.error('Error sending log to ZincSearch:', error.message);
   }
   }

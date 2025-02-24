@@ -296,3 +296,31 @@ getPublicResource(@Req() req: PublicRequest) {
     "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
   }
 }
+
+//CURL to add error , logs in zincsearch
+
+curl 'http://127.0.0.1:4080/api/index/error' \
+  -X 'PUT' \
+  -H 'Accept: application/json, text/plain, */*' \
+  -H 'Accept-Language: en-US,en;q=0.9,hi;q=0.8' \
+  -H 'Authorization: Basic Z3JhbmR6YW06Z3JhbmR6YW0=' \
+  -H 'Connection: keep-alive' \
+  -H 'Content-Type: application/json' \
+  -H 'Origin: http://127.0.0.1:4080' \
+  -H 'Referer: http://127.0.0.1:4080/ui/index' \
+  -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36' \
+  --data-raw '{"name":"error","storage_type":"disk","settings":{},"mappings":{}}' \
+  --insecure
+
+curl 'http://127.0.0.1:4080/api/index/logs' \
+  -X 'PUT' \
+  -H 'Accept: application/json, text/plain, */*' \
+  -H 'Accept-Language: en-US,en;q=0.9,hi;q=0.8' \
+  -H 'Authorization: Basic Z3JhbmR6YW06Z3JhbmR6YW0=' \
+  -H 'Connection: keep-alive' \
+  -H 'Content-Type: application/json' \
+  -H 'Origin: http://127.0.0.1:4080' \
+  -H 'Referer: http://127.0.0.1:4080/ui/index' \
+  -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36' \
+  --data-raw '{"name":"logs","storage_type":"disk","settings":{},"mappings":{}}' \
+  --insecure

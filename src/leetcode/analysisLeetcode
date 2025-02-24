@@ -1,0 +1,276 @@
+query questionDetail($titleSlug: String) {
+
+    question(titleSlug: $titleSlug) {
+      title
+      titleSlug
+      questionId
+      questionFrontendId
+      questionTitle
+      translatedTitle
+      content
+      translatedContent
+      categoryTitle
+      difficulty
+      stats
+      companyTagStatsV2
+      topicTags {
+        name
+        slug
+        translatedName
+      }
+      similarQuestionList {
+        difficulty
+        titleSlug
+        questionId
+        title
+      }
+      nextChallenges {
+        difficulty
+        questionId
+        title
+        titleSlug
+        questionFrontendId
+      }
+      exampleTestcaseList
+    }
+  }
+
+
+
+  curl 'https://leetcode.com/graphql/' \
+  -H 'accept: */*' \
+  -H 'accept-language: en-US,en;q=0.9' \
+  -H 'authorization;' \
+  -H 'content-type: application/json' \
+  -H 'cookie: csrftoken=Yuj3H94eV7MNl7hAI1OeXAisL1CSkyvmuNauiTyJwJXQNGcvistoup1NwaNZxGZv; INGRESSCOOKIE=6fa80ea5fa6cf8f12cf813fe43cf5b85|8e0876c7c1464cc0ac96bc2edceabd27; gr_user_id=3cab1562-f3df-434b-bae9-69cee92eb884; _gid=GA1.2.25366885.1740385264; ip_check=(false, "2409:40d0:10c8:c35:eaf3:cbc4:200:9ff7"); 87b5a3c3f1a55520_gr_session_id=151047f5-7559-45ba-afd4-2d8b3b89ff8f; _ga=GA1.1.1730980087.1740385264; 87b5a3c3f1a55520_gr_session_id_sent_vst=151047f5-7559-45ba-afd4-2d8b3b89ff8f; _ga_CDRWKZTDEX=GS1.1.1740387741.2.1.1740387810.54.0.0' \
+  -H 'origin: https://leetcode.com' \
+  -H 'priority: u=1, i' \
+  -H 'random-uuid: 00b3b94a-d622-baec-d6fa-77dbd29d94d3' \
+  -H 'referer: https://leetcode.com/problems/3sum-closest/' \
+  -H 'sec-ch-ua: "Google Chrome";v="129", "Not=A?Brand";v="8", "Chromium";v="129"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "Linux"' \
+  -H 'sec-fetch-dest: empty' \
+  -H 'sec-fetch-mode: cors' \
+  -H 'sec-fetch-site: same-origin' \
+  -H 'user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36' \
+  -H 'uuuserid: d2f813d4a3e9a6d5271ab79675f84655f' \
+  -H 'x-csrftoken: Yuj3H94eV7MNl7hAI1OeXAisL1CSkyvmuNauiTyJwJXQNGcvistoup1NwaNZxGZv' \
+  --data-raw $'{"query":"\\n    query questionDetail($titleSlug: String\u0021) {\\n  languageList {\\n    id\\n    name\\n  }\\n  submittableLanguageList {\\n    id\\n    name\\n    verboseName\\n  }\\n  statusList {\\n    id\\n    name\\n  }\\n  questionDiscussionTopic(questionSlug: $titleSlug) {\\n    id\\n    commentCount\\n    topLevelCommentCount\\n  }\\n  ugcArticleOfficialSolutionArticle(questionSlug: $titleSlug) {\\n    uuid\\n    chargeType\\n    canSee\\n    hasVideoArticle\\n  }\\n  question(titleSlug: $titleSlug) {\\n    title\\n    titleSlug\\n    questionId\\n    questionFrontendId\\n    questionTitle\\n    translatedTitle\\n    content\\n    translatedContent\\n    categoryTitle\\n    difficulty\\n    stats\\n    companyTagStatsV2\\n    topicTags {\\n      name\\n      slug\\n      translatedName\\n    }\\n    similarQuestionList {\\n      difficulty\\n      titleSlug\\n      title\\n      translatedTitle\\n      isPaidOnly\\n    }\\n    mysqlSchemas\\n    dataSchemas\\n    frontendPreviews\\n    likes\\n    dislikes\\n    isPaidOnly\\n    status\\n    canSeeQuestion\\n    enableTestMode\\n    metaData\\n    enableRunCode\\n    enableSubmit\\n    enableDebugger\\n    envInfo\\n    isLiked\\n    nextChallenges {\\n      difficulty\\n      title\\n      titleSlug\\n      questionFrontendId\\n    }\\n    libraryUrl\\n    adminUrl\\n    hints\\n    codeSnippets {\\n      code\\n      lang\\n      langSlug\\n    }\\n    exampleTestcaseList\\n    hasFrontendPreview\\n  }\\n}\\n    ","variables":{"titleSlug":"3sum-closest"},"operationName":"questionDetail"}'
+
+
+
+  {
+  "title": "Letter Combinations of a Phone Number",
+  "titleSlug": "letter-combinations-of-a-phone-number",
+  "questionId": "17",
+  "questionFrontendId": "17",
+  "questionTitle": "Letter Combinations of a Phone Number",
+  "translatedTitle": null,
+  "content": "<p>Given a string containing digits from <code>2-9</code> inclusive, return all possible letter combinations that the number could represent. Return the answer in <strong>any order</strong>.</p>\n\n<p>A mapping of digits to letters (just like on the telephone buttons) is given below. Note that 1 does not map to any letters.</p>\n<img alt=\"\" src=\"https://assets.leetcode.com/uploads/2022/03/15/1200px-telephone-keypad2svg.png\" style=\"width: 300px; height: 243px;\" />\n<p>&nbsp;</p>\n<p><strong class=\"example\">Example 1:</strong></p>\n\n<pre>\n<strong>Input:</strong> digits = &quot;23&quot;\n<strong>Output:</strong> [&quot;ad&quot;,&quot;ae&quot;,&quot;af&quot;,&quot;bd&quot;,&quot;be&quot;,&quot;bf&quot;,&quot;cd&quot;,&quot;ce&quot;,&quot;cf&quot;]\n</pre>\n\n<p><strong class=\"example\">Example 2:</strong></p>\n\n<pre>\n<strong>Input:</strong> digits = &quot;&quot;\n<strong>Output:</strong> []\n</pre>\n\n<p><strong class=\"example\">Example 3:</strong></p>\n\n<pre>\n<strong>Input:</strong> digits = &quot;2&quot;\n<strong>Output:</strong> [&quot;a&quot;,&quot;b&quot;,&quot;c&quot;]\n</pre>\n\n<p>&nbsp;</p>\n<p><strong>Constraints:</strong></p>\n\n<ul>\n\t<li><code>0 &lt;= digits.length &lt;= 4</code></li>\n\t<li><code>digits[i]</code> is a digit in the range <code>[&#39;2&#39;, &#39;9&#39;]</code>.</li>\n</ul>\n",
+  "translatedContent": null,
+  "categoryTitle": "Algorithms",
+  "difficulty": "Medium",
+
+  "similarQuestionList": [
+    {
+      "difficulty": "Medium",
+      "titleSlug": "generate-parentheses",
+      "title": "Generate Parentheses",
+      "translatedTitle": null,
+      "isPaidOnly": false
+    },
+    {
+      "difficulty": "Medium",
+      "titleSlug": "combination-sum",
+      "title": "Combination Sum",
+      "translatedTitle": null,
+      "isPaidOnly": false
+    },
+    {
+      "difficulty": "Easy",
+      "titleSlug": "binary-watch",
+      "title": "Binary Watch",
+      "translatedTitle": null,
+      "isPaidOnly": false
+    },
+    {
+      "difficulty": "Medium",
+      "titleSlug": "count-number-of-texts",
+      "title": "Count Number of Texts",
+      "translatedTitle": null,
+      "isPaidOnly": false
+    },
+    {
+      "difficulty": "Easy",
+      "titleSlug": "minimum-number-of-pushes-to-type-word-i",
+      "title": "Minimum Number of Pushes to Type Word I",
+      "translatedTitle": null,
+      "isPaidOnly": false
+    },
+    {
+      "difficulty": "Medium",
+      "titleSlug": "minimum-number-of-pushes-to-type-word-ii",
+      "title": "Minimum Number of Pushes to Type Word II",
+      "translatedTitle": null,
+      "isPaidOnly": false
+    }
+  ],
+  "exampleTestcaseList": [
+    "\"23\"",
+    "\"\"",
+    "\"2\""
+  ],
+}
+
+`query questionDetail($titleSlug: String!) {
+
+  question(titleSlug: $titleSlug) {
+    title
+    titleSlug
+    questionId
+    questionFrontendId
+    questionTitle
+    translatedTitle
+    content
+    translatedContent
+    categoryTitle
+    difficulty
+    stats
+    companyTagStatsV2
+    topicTags {
+      name
+      slug
+      translatedName
+    }
+    similarQuestionList {
+      difficulty
+      titleSlug
+      title
+      translatedTitle
+      isPaidOnly
+    }
+    nextChallenges {
+      difficulty
+      title
+      titleSlug
+      questionFrontendId
+    }
+
+    exampleTestcaseList
+  }
+}
+  
+import axios from 'axios';
+
+const response = await axios.post(
+  'https://leetcode.com/graphql/',
+  {
+    'query': '\n    query questionDetail($titleSlug: String) {\n question(titleSlug: $titleSlug) {\n      title\n      titleSlug\n      questionId\n      questionFrontendId\n      questionTitle\n      translatedTitle\n      content\n      translatedContent\n      categoryTitle\n      difficulty\n      stats\n      companyTagStatsV2\n      topicTags {\n        name\n        slug\n        translatedName\n      }\n      similarQuestionList {\n        difficulty\n        titleSlug\n        questionId\n        title\n      }\n      isPaidOnly\n      status\n      metaData\n      nextChallenges {\n        difficulty\n        questionId\n        title\n        titleSlug\n        questionFrontendId\n      }\n      exampleTestcaseList\n    }\n  }\n ',
+    'variables': {
+      'titleSlug': '3sum-closest'
+    },
+    'operationName': 'questionDetail'
+  },
+  {
+    headers: {
+      'accept': '*/*',
+      'accept-language': 'en-US,en;q=0.9',
+      'authorization': '',
+      'content-type': 'application/json',
+      'cookie': 'csrftoken=Yuj3H94eV7MNl7hAI1OeXAisL1CSkyvmuNauiTyJwJXQNGcvistoup1NwaNZxGZv; INGRESSCOOKIE=6fa80ea5fa6cf8f12cf813fe43cf5b85|8e0876c7c1464cc0ac96bc2edceabd27; gr_user_id=3cab1562-f3df-434b-bae9-69cee92eb884; _gid=GA1.2.25366885.1740385264; ip_check=(false, "2409:40d0:10c8:c35:eaf3:cbc4:200:9ff7"); 87b5a3c3f1a55520_gr_session_id=151047f5-7559-45ba-afd4-2d8b3b89ff8f; _ga=GA1.1.1730980087.1740385264; 87b5a3c3f1a55520_gr_session_id_sent_vst=151047f5-7559-45ba-afd4-2d8b3b89ff8f; _ga_CDRWKZTDEX=GS1.1.1740387741.2.1.1740387810.54.0.0',
+      'origin': 'https://leetcode.com',
+      'priority': 'u=1, i',
+      'random-uuid': '00b3b94a-d622-baec-d6fa-77dbd29d94d3',
+      'referer': 'https://leetcode.com/problems/3sum-closest/',
+      'sec-ch-ua': '"Google Chrome";v="129", "Not=A?Brand";v="8", "Chromium";v="129"',
+      'sec-ch-ua-mobile': '?0',
+      'sec-ch-ua-platform': '"Linux"',
+      'sec-fetch-dest': 'empty',
+      'sec-fetch-mode': 'cors',
+      'sec-fetch-site': 'same-origin',
+      'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
+      'uuuserid': 'd2f813d43e9a6d5271ab79675f84655f',
+      'x-csrftoken': 'Yuj3H94eV7MNl7hAI1OeXAisL1CSkyvmuNauiTyJwJXQNGcvistoup1NwaNZxGZv'
+    }
+  }
+);
+
+
+const axios = require("axios");
+
+async function fetchLeetCodeProblem(slug) {
+    const url = "https://leetcode.com/graphql";
+    const query = {
+        query: ` query getQuestionDetail($titleSlug: String!) {
+            question(titleSlug: $titleSlug) {
+                title
+                titleSlug
+                questionId
+                questionFrontendId
+                questionTitle
+                translatedTitle
+                content
+                translatedContent
+                categoryTitle
+                difficulty
+                topicTags {
+                  name
+                  slug
+                  translatedName
+                }
+                similarQuestionList {
+                  difficulty
+                  titleSlug
+                  questionId
+                  title
+                }
+                nextChallenges {
+                  difficulty
+                  questionId
+                  title
+                  titleSlug
+                  questionFrontendId
+                }
+                exampleTestcaseList
+            }
+        }`,
+        variables: { titleSlug: slug },
+        // operationName: 'questionDetail'
+    };
+
+    try {
+        const response = await axios.post(url, query, {
+            headers: {
+              'accept': '*/*',
+              'accept-language': 'en-US,en;q=0.9',
+              'content-type': 'application/json',
+              'cookie': 'csrftoken=Yuj3H94eV7MNl7hAI1OeXAisL1CSkyvmuNauiTyJwJXQNGcvistoup1NwaNZxGZv; INGRESSCOOKIE=6fa80ea5fa6cf8f12cf813fe43cf5b85|8e0876c7c1464cc0ac96bc2edceabd27; gr_user_id=3cab1562-f3df-434b-bae9-69cee92eb884; 87b5a3c3f1a55520_gr_session_id=33b8bd65-c80c-4e14-b707-748bea001f9a; _gid=GA1.2.25366885.1740385264; _gat=1; ip_check=(false, "2409:40d0:10c8:c35:eaf3:cbc4:200:9ff7"); 87b5a3c3f1a55520_gr_session_id_sent_vst=33b8bd65-c80c-4e14-b707-748bea001f9a; _ga=GA1.1.1730980087.1740385264; _ga_CDRWKZTDEX=GS1.1.1740385263.1.1.1740385293.30.0.0',
+              'origin': 'https://leetcode.com',
+              'priority': 'u=1, i',
+              'random-uuid': '00b3b94a-d622-baec-d6fa-77dbd29d94d3',
+              'referer': 'https://leetcode.com/problems/${slug}/description/',
+              'sec-ch-ua': '"Google Chrome";v="129", "Not=A?Brand";v="8", "Chromium";v="129"',
+              'sec-ch-ua-mobile': '?0',
+              'sec-ch-ua-platform': '"Linux"',
+              'sec-fetch-dest': 'empty',
+              'sec-fetch-mode': 'cors',
+              'sec-fetch-site': 'same-origin',
+              'sentry-trace': 'aadd23de586549d0b62e02c85c318cd5-b5d86e9245155ec0-0',
+              'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
+              'x-csrftoken': 'Yuj3H94eV7MNl7hAI1OeXAisL1CSkyvmuNauiTyJwJXQNGcvistoup1NwaNZxGZv'
+            }
+        });
+
+        const problem = response.data.data.question;
+        console.log(`${response.data.data}`)
+        
+        console.log(`\nProblem Title: ${problem.title}`);
+        console.log(`\nProblem Statement:\n${problem.content.replace(/<\/?[^>]+(>|$)/g, "")/* .substring(0, 500) */}...`);
+    } catch (error) {
+        console.error("❌ Error fetching problem:", error.message);
+    }
+}
+
+// Run the function with the problem slug (e.g., "two-sum")
+fetchLeetCodeProblem("two-sum");

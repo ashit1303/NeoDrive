@@ -16,6 +16,26 @@ export class HelperAndFormatter {
     }
     return{shortCode: parts.join('-')}
   }
+  public static cleanHTML(html: String) : string {
+    // 1. Decode HTML entities
+    const decodedHtml = html
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&amp;/g, "&");
+  
+    // 2. Remove HTML tags but preserve line breaks and spaces
+    const cleanText = decodedHtml
+      .replace(/<pre>|<\/pre>/g, '\n') // Keep new lines from <pre>
+      .replace(/<code>|<\/code>/g, '') // Remove <code> tags but keep content
+      .replace(/<\/?[^>]+(>|$)/g, '') // Remove all remaining HTML tags
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .trim(); // Remove leading/trailing spaces
+  
+    return cleanText;
+  }
+  
   public static getPaginate(page:PageDto) {
     const skip = (page.page - 1) * page.pageSize;
     const take = parseInt(page.pageSize.toString())

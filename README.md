@@ -31,6 +31,7 @@ Check out a few resources that may come in handy when working with NestJS:
 - FileUploader
 - Leetcode Problem Solver
 - Liftbridge Integration
+
 ## Install core package
 
 ```bash
@@ -41,7 +42,7 @@ $ ./install-linux
 $ ./install-termux
 
 ```
-## Install core package
+## Prepare configs
 
 ```bash
 # Create all conf | log | data | env | initiate.sql
@@ -90,6 +91,4 @@ $ yarn run start:prod
 
 [LICENCE](https://github.com/ashit1303/NeoDrive/blob/main/LICENSE)
 ## TO build
-
-
 
