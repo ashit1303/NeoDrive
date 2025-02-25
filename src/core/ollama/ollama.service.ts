@@ -9,6 +9,7 @@ export class OllamaService {
 
     constructor(private configService: ConfigService) {
         this.baseUrl = this.configService.get<string>('OLLAMA_URL') || 'http://localhost:11434';
+        this.model = this.configService.get<string>('OLLAMA_MODEL') || 'deepseek-r1:1.5b';
     }
 
     async generateResponse(prompt: string, ) {

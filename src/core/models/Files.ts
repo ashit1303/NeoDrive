@@ -9,7 +9,7 @@ import {
 import { Users } from "./Users";
 
 @Index("idx_file_sha", ["fileSha"], { unique: true })
-// @Index("IDX_57f17ea65a30af847a0a5fb5c1", ["fileSha"], { unique: true })
+@Index("IDX_57f17ea65a30af847a0a5fb5c1", ["fileSha"], { unique: true })
 @Index("files_users_id_fk", ["createdBy"], {})
 @Entity("files", { schema: "neodrive" })
 export class Files {

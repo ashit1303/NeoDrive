@@ -6,6 +6,7 @@ import axios from 'axios';
 import { ConfigService } from "@nestjs/config";
 import { OllamaService } from "src/core/ollama/ollama.service";
 import { ZincLogger } from "src/core/logger/zinc.service";
+import { QuestsAnswer } from "src/core/models/QuestsAnswer";
 
 
 @Injectable()
@@ -14,12 +15,15 @@ import { ZincLogger } from "src/core/logger/zinc.service";
       private typeorm: TypeormService,
       private readonly configService: ConfigService,
       private readonly ollama: OllamaService,
-      private readonly zinc: ZincLogger,
+      private readonly logger: ZincLogger,
     ){}
+    getSlugFromUrl(url: string): string {
+      return url.split('problems/')[1].split('/')[0];
+    }
 
     async handleExtraSlugs(slugsList: string[]): Promise<void> {
       if (!slugsList || slugsList.length === 0) {
-        this.zinc.log('No slugs to insert', slugsList);
+        this.logger.log('No slugs to insert', slugsList);
         return; // Handle empty input gracefully
       }
   
@@ -40,13 +44,28 @@ import { ZincLogger } from "src/core/logger/zinc.service";
           .execute();
   
       } catch (error) {
-        this.zinc.error('No slugs to insert', error, slugsList);
+        this.logger.error('No slugs to insert', error, slugsList);
         
         Promise.resolve()
       }
     }
-    async storeQuestion(data: any) {
 
+    async storeQuestsAnswer(data: any,slug: string, codelang) {
+      try{
+      const dbQuestion = await this.getQuestFromDB(slug);
+      const questAnswer = this.typeorm.getRepository(QuestsAnswer).create({
+        questionId: dbQuestion.questionId|| null,
+        codeLang: codelang.toLowerCase()|| null, // Ensure ENUM values are lowercase
+        llmRes: data || null,
+      });
+      return this.typeorm.getRepository(QuestsAnswer).save(questAnswer);
+      }catch (error) {
+        this.logger.error('Error While Storing LeetQuests', error, data);
+        Promise.resolve()
+      }
+    }
+
+    async storeQuestion(data: any) {
       this.handleExtraSlugs([...data.similarQuestionList,...data.nextChallenges]);
 
       const cleanedContent= Helper.cleanHTML(data.content);
@@ -61,18 +80,16 @@ import { ZincLogger } from "src/core/logger/zinc.service";
       });
       return this.typeorm.getRepository(Quests).save(newQuestion);
     }
-    getSlugFromUrl(url: string): string {
-      return url.split('problems/')[1].split('/')[0];
-    }
+
 
     async getQuestFromDB(slug:string): Promise<any> {
       // return this.typeorm.getRepository(Quests).findOne({ where: { titleSlug: url } });
-      const question = await this.typeorm.getRepository(Quests).findOne({ where: { titleSlug: slug } });
-      return question;
+      return await this.typeorm.getRepository(Quests).findOne({ where: { titleSlug: slug } });
+      
     }
     // https://leetcode.com/problems/longest-substring-without-repeating-characters/
 
-    async fetchQuestionDetailsUsingSlug(slug:string) {
+    async fetchQuestionDetailsFromLeetCode(slug:string) {
         const url = "https://leetcode.com/graphql";
         const query = {
             query: ` query getQuestionDetail($titleSlug: String!) {
@@ -126,16 +143,16 @@ import { ZincLogger } from "src/core/logger/zinc.service";
     
             const problemDetails = response.data.data.question;
             await this.storeQuestion(problemDetails)
-            return problemDetails
+            return problemDetails;
         } catch (error) {
-            console.error("Error fetching problem:", error.message);
+            this.logger.error("Error fetching problem:", error.message);
         }
-    
     }
 
-    async getExplanation(codeLang: string, slug: string) {
+    async getExplanation(codeLang: string, questionDescription: string, slug: string) {
       let explainPromt = `Give only optimed code, explanation, time and space complexity in ${codeLang}`
-      const llmRes = await  this.ollama.generateResponse(slug+' '+explainPromt);
+      const llmRes = await  this.ollama.generateResponse(questionDescription+' '+explainPromt);
+      this.storeQuestsAnswer(llmRes,slug,codeLang);
       return llmRes;
     }
 

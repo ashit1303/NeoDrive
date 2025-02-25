@@ -22,7 +22,7 @@ Check out a few resources that may come in handy when working with NestJS:
 - [MongoDB](Under development) 
 - [GraphQl](Under development) 
 - [Mailer](Under development)
-- [GraphQL](Under development)
+- [Neo4j](Under development)
 - Author - [Ash](https://github.com/ashit1303)
 
 # RoadMap 
@@ -30,7 +30,15 @@ Check out a few resources that may come in handy when working with NestJS:
 - LinkShortener
 - FileUploader
 - Leetcode Problem Solver
-- Liftbridge Integration
+- Liftbridge Integration(Comms)
+- writing test case 
+- reduce memory consumption
+- graphql
+- understanding graphDb
+- diagnostics tests
+- Scripts(cron -update quesitons/ find solutions)
+- Scripts(cron -update quesitons/ find solutions)
+- Tests (search)(Sonic) (get acronyms)(llms)(mappings) 
 
 ## Install core package
 

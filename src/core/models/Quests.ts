@@ -1,6 +1,7 @@
 import { Column, Entity, Index, PrimaryGeneratedColumn } from "typeorm";
 
 @Index("title_slug", ["titleSlug"], { unique: true })
+@Index("IDX_a6abed33896fa1c0cb144ba8c8", ["titleSlug"], { unique: true })
 @Entity("quests", { schema: "neodrive" })
 export class Quests {
   @PrimaryGeneratedColumn({ type: "bigint", name: "id", unsigned: true })

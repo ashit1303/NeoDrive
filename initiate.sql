@@ -73,3 +73,12 @@ CREATE TABLE IF NOT EXISTS  quests (
   created_at timestamp       default current_timestamp() null,
   updated_at timestamp       default current_timestamp() null on update current_timestamp()
 );
+
+create table if not exists quests_answer (
+  id SERIAL PRIMARY KEY ,
+  question_id int(10) unsigned  null,
+  code_lang ENUM('js', 'python', 'java','cpp','go') NULL,
+  llm_res TEXT NULL,
+  created_at timestamp       default current_timestamp() null,
+  updated_at timestamp       default current_timestamp() null on update current_timestamp()
+)

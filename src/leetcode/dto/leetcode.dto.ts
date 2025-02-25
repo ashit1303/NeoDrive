@@ -6,3 +6,11 @@ export class UrlDTO {
   @IsUrl()
   url: string;
 }
+
+export enum CodeLangDTO {
+  PYTHON = 'python',
+  JS = 'js',
+  GO = 'go',
+  JAVA = 'java',
+  CPP = 'cpp'
+}

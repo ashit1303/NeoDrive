@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as redis from 'redis';
+import { ZincLogger } from '../logger/zinc.service';
 
 
 @Injectable()
 export class RedisConfigService {
-  constructor(private configService: ConfigService) {}
+  constructor(
+    private configService: ConfigService,
+    private logger: ZincLogger,
+  ) {}
 
   getClient(): ReturnType<typeof redis.createClient> {
     const host = this.configService.get<string>('REDIS_HOST');
@@ -16,8 +20,8 @@ export class RedisConfigService {
     client.on('error', (err) => {
       // Handle Redis client errors
       // retry connection
-      // try { client.connect()}
-      // catch (error) {console.error('Redis Client Error', error);}
+      try { client.connect() }
+      catch (error) {this.logger.error('Redis Client Error', error);}
       // console.error('Redis Client Error', err);
     });
 

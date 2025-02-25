@@ -7,7 +7,7 @@ import { ZincLogger } from './zinc.service';
 export class LoggerMiddleware implements NestMiddleware {
   constructor(
     // private readonly vector: VectorLogger,
-    private readonly zinc: ZincLogger
+    private readonly logger: ZincLogger
   ) {}
 
   use(req: Request, res: Response, next: NextFunction) {
@@ -21,7 +21,7 @@ export class LoggerMiddleware implements NestMiddleware {
         return;
       }
 
-      this.zinc.log('HTTP Request', {
+      this.logger.log('Requests', {
         status: res.statusCode,
         method: req.method,
         url: req.originalUrl,
