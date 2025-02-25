@@ -34,9 +34,10 @@ export class LeetCodeController {
       // if not found use slug to get question details and store in db
       // explain from ollama
 
-      let resp = await this.cache.get(url+codeLang);
-      if(resp) return JSON.parse(resp);
       const slug = this.leetCodeService.getSlugFromUrl(url);
+      let resp = await this.cache.get(codeLang+slug);
+      if(resp) return JSON.parse(resp);
+
       let dbQuestion = await this.leetCodeService.getQuestFromDB(slug);
       if(!dbQuestion){
         dbQuestion = await this.leetCodeService.fetchQuestionDetailsFromLeetCode(slug);
