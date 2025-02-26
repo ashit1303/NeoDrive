@@ -1,0 +1,48 @@
+version: "3.9"  
+
+services:
+  mariadb:
+    image: mariadb:latest  # Or a specific version
+    container_name: mariadb
+    ports:
+      - "3306:3306"  # Map the port (adjust if needed)
+    volumes:
+      - ~/xData/data/mariadb/db:/var/lib/mysql  # Persist database data
+    environment:
+      - MARIADB_ROOT_PASSWORD=your_root_password  # Set root password (IMPORTANT)
+      - MARIADB_USER=your_user  # Create a user (optional)
+      - MARIADB_PASSWORD=your_password  # User password (optional)
+      - MARIADB_DATABASE=neodrive # Database name
+    restart: always
+
+  zincsearch:
+    image: public.ecr.aws/zinclabs/zincsearch:latest # Use the specific image
+    container_name: zincsearch-
+    ports:
+      - "4080:4080"  # ZincSearch HTTP (changed to 4080 as per your command)
+      # - "6000:6000"  # ZincSearch gRPC (if needed) - Uncomment if you need gRPC
+    volumes:
+      - ~/xData/data/zincsearch:/data  # Use /data as per your command
+    environment:
+      - ZINC_FIRST_ADMIN_USER=admin
+      - ZINC_FIRST_ADMIN_PASSWORD=Complexpass#123 # For initial setup ONLY - CHANGE IMMEDIATELY
+      - ZINC_DATA_PATH=/data # Important: Set this path inside the container
+    restart: always
+
+  valkey:
+    image: valkey/valkey:latest
+    container_name: valkey-$packageName
+    ports:
+      - "6379:6379" # Default Redis port
+    volumes:
+      - ~/xData/data/$packageName/valkey:/data # Persist data
+    restart: always
+
+  sonic: # Example - adapt as needed
+    image: valeriansaliou/sonic:latest # Replace with actual image
+    container_name: sonicsearch
+    ports:
+      - "1491:1491"
+    volumes:
+      - ~/xData/data/sonicsearch:/var/lib/sonic/store/ # Persist data
+    restart: always

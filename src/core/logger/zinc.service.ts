@@ -41,7 +41,8 @@ export class ZincLogger implements LoggerService {
     trace: trace || undefined,
   };
   try {
-    await axios.post(
+    // making this request non blocking 
+    axios.post(
       `${this.zincUrl}/api/${this.zincIndex}/_doc`,
       logEntry,
       {
@@ -62,7 +63,7 @@ export class ZincLogger implements LoggerService {
   }
 
   error(message: string, trace?: string, context?: string | object) {
-    console.log('error', message, trace, context);
+    console.log('Error', message, trace, context);
     this.sendLog('error', message, context, trace);
   }
 

@@ -9,7 +9,6 @@ import {
 import { Users } from "./Users";
 
 @Index("idx_short_code", ["shortCode"], { unique: true })
-@Index("IDX_893225572831d7cc86302f28a6", ["shortCode"], { unique: true })
 @Index("shortend_link_users_id_fk", ["createdBy"], {})
 @Entity("shortend_link", { schema: "neodrive" })
 export class ShortendLink {

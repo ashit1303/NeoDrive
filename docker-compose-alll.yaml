@@ -1,0 +1,121 @@
+version: "3.9"  # Or your preferred compose file version
+
+services:
+
+  mariadb:
+    image: mariadb:latest  # Or a specific version
+    container_name: mariadb
+    ports:
+      - "3306:3306"  # Map the port (adjust if needed)
+    volumes:
+      - ~/xData/data/mariadb/db:/var/lib/mysql  # Persist database data
+    environment:
+      - MARIADB_ROOT_PASSWORD=your_root_password  # Set root password (IMPORTANT)
+      - MARIADB_USER=your_user  # Create a user (optional)
+      - MARIADB_PASSWORD=your_password  # User password (optional)
+      - MARIADB_DATABASE=neodrive # Database name
+    restart: always
+    
+  mongodb:
+    image: mongodb/mongodb-community-server:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"  # Map the port (adjust if needed)
+    volumes:
+      - ~/xData/data/mongodb/db:/data/db  # Persist database data
+    restart: always
+
+  zincsearch:
+    image: public.ecr.aws/zinclabs/zincsearch:latest # Use the specific image
+    container_name: zincsearch-
+    ports:
+      - "4080:4080"  # ZincSearch HTTP (changed to 4080 as per your command)
+      # - "6000:6000"  # ZincSearch gRPC (if needed) - Uncomment if you need gRPC
+    volumes:
+      - ~/xData/data/zincsearch:/data  # Use /data as per your command
+    environment:
+      - ZINC_FIRST_ADMIN_USER=admin
+      - ZINC_FIRST_ADMIN_PASSWORD=Complexpass#123 # For initial setup ONLY - CHANGE IMMEDIATELY
+      - ZINC_DATA_PATH=/data # Important: Set this path inside the container
+    restart: always
+
+  nginx:
+    image: nginx:latest  # Or a specific version
+    container_name: nginx
+    ports:
+      # - "80:80"  # Web port
+      - "443:443"  # HTTPS port (if you configure SSL)
+    volumes:
+      - ~/xData/start/nginx.conf:/etc/nginx/conf.d/default.conf  # Your Nginx config
+      - ~/xData/logs/nginx:/var/log/nginx  # Nginx logs
+    # depends_on:  # Ensure services it depends on are up
+    #   - zincsearch
+    #   - <other_services_nginx_depends_on> # e.g., mariadb
+    restart: always
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "8081:8081" # or your port
+    volumes:
+      - ~/xData/data/ollama:/root/.cache/ollama # Persist models
+    restart: always
+
+  valkey:
+    image: valkey/valkey:latest
+    container_name: valkey-$packageName
+    ports:
+      - "6379:6379" # Default Redis port
+    volumes:
+      - ~/xData/data/$packageName/valkey:/data # Persist data
+    restart: always
+
+  vector:
+    image: timberio/vector:latest-alpine
+    container_name: vector
+    ports:
+      - "8082:8082" # or your port
+    volumes:
+      - ~/xData/start/vector.toml:/etc/vector/vector.toml # Vector config
+      - ~/xData/logs/vector:/var/log/vector # Vector logs
+    depends_on:
+      - zincsearch # Or other services it depends on
+    restart: always
+
+  victoriametrics:
+    image: victoriametrics/victoria-metrics:latest
+    container_name: victoriametrics
+    ports:
+      - "8428:8428" # VictoriaMetrics HTTP
+      # - "8083:8083" # or your port
+    volumes:
+      - ~/xData/data/victoria-metrics:/data # Persist data
+    restart: always
+
+  sonic: # Example - adapt as needed
+    image: valeriansaliou/sonic:latest # Replace with actual image
+    container_name: sonicsearch
+    ports:
+      - "1491:1491"
+    volumes:
+      - ~/xData/data/sonicsearch:/var/lib/sonic/store/ # Persist data
+    restart: always
+    # ... other config
+
+  liftbridge: # Example - adapt as needed
+    image: liftbridge/liftbridge:latest
+    container_name: liftbridge
+    ports:
+      - "8085:8085"
+    volumes:
+      - ~/xData/data/liftbridge:/var/lib/liftbridge/ # Persist data
+    restart: always
+    # ... other config
+
+
+volumes: # Define named volumes (optional)
+  mariadb_data:
+  zincsearch_data:
+  valkey_data:
+  victoria_metrics_data:

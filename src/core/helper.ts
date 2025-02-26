@@ -18,6 +18,7 @@ export class HelperAndFormatter {
   }
   public static cleanHTML(html: String) : string {
     // 1. Decode HTML entities
+    try{
     const decodedHtml = html
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'")
@@ -34,6 +35,9 @@ export class HelperAndFormatter {
       .trim(); // Remove leading/trailing spaces
   
     return cleanText;
+    }catch(e){
+      return ''
+    }
   }
   
   public static getPaginate(page:PageDto) {

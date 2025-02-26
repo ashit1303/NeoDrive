@@ -1,7 +1,7 @@
 
 ## Description
 
-[NeoDrive](https://github.com/ashit1303/NeoDrive) A project to learn a modern professional typescript application and making it scalable using open source projects.
+[NeoDrive](https://github.com/ashit1303/NeoDrive) A project to learn a typescript application and making it scalable using open source projects.
 
 ## Resources
 
@@ -23,22 +23,32 @@ Check out a few resources that may come in handy when working with NestJS:
 - [GraphQl](Under development) 
 - [Mailer](Under development)
 - [Neo4j](Under development)
+- [OLAP-DuckDB](Under development)
 - Author - [Ash](https://github.com/ashit1303)
 
 # RoadMap 
 
-- LinkShortener
-- FileUploader
-- Leetcode Problem Solver
+- LinkShortener - Done
+- FileUploader - Done
+- Leetcode Problem Solver - Done
+- Scripts(cron -update quesitons/ find solutions) airflow
 - Liftbridge Integration(Comms)
-- writing test case 
+- LLM integration
 - reduce memory consumption
 - graphql
 - understanding graphDb
-- diagnostics tests
-- Scripts(cron -update quesitons/ find solutions)
-- Scripts(cron -update quesitons/ find solutions)
+
+- jest pactun for testing e2e writing test case 
+- circle ci
+- github actions
 - Tests (search)(Sonic) (get acronyms)(llms)(mappings) 
+- Docker podman for containerize dependency 
+- 
+
+## Docker prerequisites
+
+```bash
+$ podman compose up -d
 
 ## Install core package
 
@@ -100,3 +110,14 @@ $ yarn run start:prod
 [LICENCE](https://github.com/ashit1303/NeoDrive/blob/main/LICENSE)
 ## TO build
 
+
+
+Separate project 
+- Remove duplicate partners
+- remove duplicate centers
+- remove diagnostics tests
+- put tests on sonic for quick search
+- partners -> center(lat,long) -> tests -> prices
+- partners -> pincodes -> tests -> prices
+- grouping of pincodes for a particular partner based on lat, long
+- users -> lat, long -> nearby pincodes using Approx lat, long -> partners/centers -> tests availability -> prices

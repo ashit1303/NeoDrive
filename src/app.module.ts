@@ -21,6 +21,7 @@ import { LoggerMiddleware } from './core/logger/logger.middleware';
 // import { VectorLogger } from './core/logger/vector.service';
 import { ZincLogger } from './core/logger/zinc.service';
 import { LeetCodeModule } from './leetcode/leetcode.module';
+import { CronModule } from './core/cron/cron.module';
 // import { ResponseModifierMiddleware } from './core/response.interceptor';
 log('process.env.NODE_ENV', process.env.NODE_ENV);
 @Module({
@@ -31,7 +32,7 @@ log('process.env.NODE_ENV', process.env.NODE_ENV);
     // ignoreEnvFile: true,  // Ignores the .env file
     // envFilePath: null,
   }),
-    TypeormModule, AuthModule, MailerModule, FileModule, UserModule, SonicModule, ShortenerModule, LeetCodeModule,
+    TypeormModule, AuthModule, MailerModule, FileModule, UserModule, SonicModule, ShortenerModule, LeetCodeModule, CronModule
   ],
   controllers: [AppController, AuthController],
   providers: [AppService, AuthService, SonicService, JwtService, RedisService, RedisConfigService, ConfigService,  ZincLogger,],

@@ -21,7 +21,7 @@ export class ShortenerService {
       // return { resp.originalUrl};
       return !Boolean(resp);
     } catch (error) {
-      this.logger.error('FailedToCheckIfAvailable', 'checkIfAvailable', { error });
+      this.logger.error('FailedToCheckIfAvailable', 'checkIfAvailable', { shortValue});
       throw new NotFoundException(error.message || 'Short code already exists');
     }
   }

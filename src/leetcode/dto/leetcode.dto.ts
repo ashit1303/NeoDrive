@@ -14,3 +14,16 @@ export enum CodeLangDTO {
   JAVA = 'java',
   CPP = 'cpp'
 }
+
+
+export class SolvedQuestsDTO {
+  
+  // questionId, itle_slug, code_lang, llm_res
+  questionId:string;
+  content:string;
+  titleSlug: string;
+  codeLang: 'js' | 'python' | 'java' | 'c++' | 'go';
+  llmRes: string;
+  questionTitle: string;
+  questionContent: string;
+}

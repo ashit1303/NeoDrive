@@ -21,7 +21,7 @@ export class RedisConfigService {
       // Handle Redis client errors
       // retry connection
       try { client.connect() }
-      catch (error) {this.logger.error('Redis Client Error', error);}
+      catch (error) {this.logger.error('Redis Client Error', error.message);}
       // console.error('Redis Client Error', err);
     });
 
