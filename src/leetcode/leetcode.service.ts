@@ -35,19 +35,21 @@ export class LeetCodeService {
     });
 
     try {
-      const valuesToInsert = relatedQuests.map((slug) => ({ titleSlug: slug })); // Prepare data for insert
+      for (const slug of relatedQuests) {
+        this.typeorm.getRepository(Quests).query(`INSERT IGNORE INTO quests (title_slug) VALUES ('${slug}');`);
+      }
+      // const valuesToInsert = relatedQuests.map((slug) => ({ titleSlug: slug })); // Prepare data for insert
 
-      await this.typeorm.getRepository(Quests)
-        .createQueryBuilder()
-        .insert()
-        .into(Quests)
-        .values(valuesToInsert) // Insert multiple values at once
-        .orIgnore()
-        .execute();
+      // await this.typeorm.getRepository(Quests)
+      //   .createQueryBuilder()
+      //   .insert()
+      //   .into(Quests)
+      //   .values(valuesToInsert) // Insert multiple values at once
+      //   .orIgnore()
+      //   .execute();
 
     } catch (error) {
       this.logger.error('No slugs to insert', error.message, slugsList);
-
       Promise.resolve()
     }
   }
@@ -107,7 +109,7 @@ export class LeetCodeService {
 
   }
   async getQuestAnsFromDB(slug: string): Promise<SolvedQuestsDTO> {
-    return  this.typeorm.query(`SELECT qu.question_id as questionId, qu.title_slug as titleSlug,qu.content, code_lang as codeLang, llm_res as llmRes, qu.difficulty, qu.question_id, qu.content, qu.question_title as questionTitle FROM quests_answer qa right join quests qu on qa.question_id = qu.question_id WHERE qu.title_slug = '${slug}')`);
+    return  this.typeorm.query(`SELECT qu.question_id as questionId, qu.title_slug as titleSlug,qu.content, code_lang as codeLang, llm_res as llmRes, qu.difficulty, qu.question_id, qu.content, qu.question_title as questionTitle FROM quests_answer qa right join quests qu on qa.question_id = qu.question_id WHERE qu.title_slug = '${slug}'  LIMIT 1`);
   }
   // https://leetcode.com/problems/longest-substring-without-repeating-characters/
 
@@ -182,8 +184,9 @@ export class LeetCodeService {
   async sloveSlugInGivenLang(slug: string, codeLang) {
     try {
       let dbQuestion = await this.fetchQuestionDetailsFromLeetCode(slug);
-      dbQuestion = `Problem Title: ${dbQuestion.questionTitle}\n Problem Statement:\n${dbQuestion.cleanedContent||dbQuestion.content}`;
       let questionId = dbQuestion.questionId
+
+      dbQuestion = `Problem Title: ${dbQuestion.questionTitle}\n Problem Statement:\n${dbQuestion.cleanedContent||dbQuestion.content}`;
       dbQuestion = JSON.stringify(dbQuestion);
       const explain = await this.getExplanation(codeLang, dbQuestion, questionId);
       return;
