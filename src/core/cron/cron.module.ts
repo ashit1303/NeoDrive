@@ -1,7 +1,7 @@
 
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
-import { LeetCodeCron } from '../jobs/leetcode.cron';
+import { LeetCodeCron } from '../tasks/leetcode.cron';
 import { LeetCodeService } from 'src/leetcode/leetcode.service';
 import { OllamaService } from '../ollama/ollama.service';
 

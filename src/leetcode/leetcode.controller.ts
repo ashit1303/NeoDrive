@@ -33,7 +33,6 @@ export class LeetCodeController {
     // get the question details from db 
     // if not found use slug to get question details and store in db
     // explain from ollama
-
     const slug = this.leetCodeService.getSlugFromUrl(url);
     let resp = await this.cache.get(codeLang + ':' + slug);
     if (resp) return JSON.parse(resp);
@@ -47,7 +46,7 @@ export class LeetCodeController {
       const question = `Problem Title: ${dbQuestion.questionTitle}\n Problem Statement:\n${dbQuestion.content}`;
       explain = await this.leetCodeService.getExplanation( codeLang, question, dbQuestion.questionId);
     }
-    await this.cache.set(url + codeLang, JSON.stringify(explain));
+    await this.cache.set(codeLang+ ':' + slug, JSON.stringify(explain));
     return explain;
   }
 
