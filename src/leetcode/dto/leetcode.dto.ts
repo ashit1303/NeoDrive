@@ -22,7 +22,7 @@ export class SolvedQuestsDTO {
   questionId:string;
   content:string;
   titleSlug: string;
-  codeLang: 'js' | 'python' | 'java' | 'c++' | 'go';
+  codeLang: 'js' | 'python' | 'java' | 'c++' | 'go'| null;
   llmRes: string;
   questionTitle: string;
   questionContent: string;

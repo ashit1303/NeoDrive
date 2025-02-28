@@ -108,8 +108,8 @@ export class LeetCodeService {
     return await this.typeorm.getRepository(Quests).findOne({ where: { titleSlug: slug } });
 
   }
-  async getQuestAnsFromDB(slug: string): Promise<SolvedQuestsDTO> {
-    const [quesiton ] = await this.typeorm.query(`SELECT qu.question_id as questionId, qu.title_slug as titleSlug,qu.content, code_lang as codeLang, llm_res as llmRes, qu.difficulty, qu.question_id, qu.content, qu.question_title as questionTitle FROM quests_answer qa right join quests qu on qa.question_id = qu.question_id WHERE qu.title_slug = '${slug}'  LIMIT 1`);
+  async getQuestAnsFromDB(slug: string, codeLang:SolvedQuestsDTO['codeLang']): Promise<SolvedQuestsDTO> {
+    const [quesiton ] = await this.typeorm.query(`SELECT qu.question_id as questionId, qu.title_slug as titleSlug,qu.content, code_lang as codeLang, llm_res as llmRes, qu.difficulty, qu.question_id, qu.content, qu.question_title as questionTitle FROM quests_answer qa right join quests qu on qa.question_id = qu.question_id WHERE qu.title_slug = '${slug}' and qa.code_lang = '${codeLang}'  LIMIT 1`);
     return quesiton
   }
   // https://leetcode.com/problems/longest-substring-without-repeating-characters/
@@ -167,7 +167,7 @@ export class LeetCodeService {
       });
       
       const problemDetails = response.data.data.question;
-      console.log('problemDetails', problemDetails)
+      console.log('problemDetails', JSON.stringify(problemDetails))
       await this.storeQuestion(problemDetails)
       return problemDetails;
     } catch (error) {

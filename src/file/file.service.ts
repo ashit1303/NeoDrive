@@ -67,7 +67,7 @@ export class FileService {
       throw new Error('Duplicate file detected');
     }
     // Save file metadata to database
-    const newFile = this.typeorm.getRepository(Files).save({
+    const newFile = await this.typeorm.getRepository(Files).save({
       fileName: fileName,
       fileSha: shaHash,
       filePath: filePath,

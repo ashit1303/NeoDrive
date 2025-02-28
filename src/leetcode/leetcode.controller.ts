@@ -5,7 +5,7 @@ import { ApiBody, ApiOperation, ApiProperty, ApiQuery, ApiResponse, ApiTags } fr
 // import { UrlDTO,  } from './dto/leetcode.dto';
 import { StandardErrorResponse } from 'src/core/http-exception.filter';
 import { RedisService } from 'src/core/redis/redis.service';
-import { CodeLangDTO } from './dto/leetcode.dto';
+import { CodeLangDTO, SolvedQuestsDTO } from './dto/leetcode.dto';
 
 @ApiTags('LeetCode')
 @Controller('leetcode')
@@ -29,20 +29,22 @@ export class LeetCodeController {
   @ApiResponse({ status: 201, description: 'Success', type: String })
   @ApiResponse({ status: 400, description: 'Bad Request. Validation failed', type: StandardErrorResponse })
   @ApiProperty({ description: 'Explain code Leetcode URL' })
-  async explainLeetQuest(@Query('url') url: string, @Query('codelang') codeLang: CodeLangDTO) {
+  async explainLeetQuest(@Query('url') url: string, @Query('codelang') codeLang: SolvedQuestsDTO['codeLang']) {
     // get the question details from db 
     // if not found use slug to get question details and store in db
     // explain from ollama
     const slug = this.leetCodeService.getSlugFromUrl(url);
-    let resp = await this.cache.get(codeLang + ':' + slug);
-    if (resp) return JSON.parse(resp);
-    let dbQuestion = await this.leetCodeService.getQuestAnsFromDB(slug);
+    let cacheResp = await this.cache.get(codeLang + ':' + slug);
+    if (cacheResp) return JSON.parse(cacheResp);
+    let dbQuestion = await this.leetCodeService.getQuestFromDB(slug);
     // console.log(dbQuestion)
     if (!dbQuestion || !dbQuestion.questionId) {
       dbQuestion = await this.leetCodeService.fetchQuestionDetailsFromLeetCode(slug);
     }
+    let solution = await this.leetCodeService.getQuestAnsFromDB(slug, codeLang);
+
     let explain = dbQuestion.llmRes;
-    if (!dbQuestion || !dbQuestion.llmRes) {
+    if (!solution || !solution.llmRes ) {  
       const question = `Problem Title: ${dbQuestion.questionTitle}\n Problem Statement:\n${dbQuestion.content}`;
       explain = await this.leetCodeService.getExplanation( codeLang, question, dbQuestion.questionId);
     }

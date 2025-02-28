@@ -26,17 +26,23 @@ export class ZincLogger implements LoggerService {
   // this.createIndex();
 
   //create logs and error in zincsearch
-  async sendLog(level: string, message: string, context?: string | object, trace?: string) {
+  async sendLog(level: string, message: string, context?: string | object, trace?: string|object) {
     const flattenedContext = context
     ? typeof context === 'object'
       ? context
       : { context }
     : {};
       
+    const flattenedError = trace
+    ? typeof trace === 'object'
+      ? trace
+      : { trace }
+    : {};
+      
   const logEntry = {
     level,
     message,
-    timestamp: new Date().toISOString(),
+    // timestamp: new Date().toISOString(),
     ...flattenedContext,
     trace: trace || undefined,
   };
