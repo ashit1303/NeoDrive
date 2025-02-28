@@ -7,8 +7,9 @@ import { ConfigService } from "@nestjs/config";
 import { OllamaService } from "src/core/ollama/ollama.service";
 import { ZincLogger } from "src/core/logger/zinc.service";
 import { QuestsAnswer } from "src/core/models/QuestsAnswer";
-import { IsNull, Not } from "typeorm";
-import { SolvedQuestsDTO } from "./dto/leetcode.dto";
+import { In, IsNull, Not } from "typeorm";
+import { SearchQuestDTO, SolvedQuestsDTO } from "./dto/leetcode.dto";
+import { SonicService } from "src/core/sonic/sonic.service";
 
 
 @Injectable()
@@ -17,6 +18,7 @@ export class LeetCodeService {
     private typeorm: TypeormService,
     private readonly configService: ConfigService,
     private readonly ollama: OllamaService,
+    private readonly smoothSearch: SonicService ,
     private readonly logger: ZincLogger,
   ) { }
   getSlugFromUrl(url: string): string {
@@ -200,4 +202,34 @@ export class LeetCodeService {
   async getUnsolvedQuests() {
     return this.typeorm.getRepository(Quests).find({ where: { questionId: IsNull() } , take: 1 });
   }
+
+  async getQuestByIds(ids: string[]): Promise<Quests[]> {
+    return this.typeorm.getRepository(Quests).find({ select: ['id','questionTitle'], where: { id: In(ids) } });
+  }
+  // async updateSonicSearchForQuestions(){
+  //   const questions = await this.typeorm.getRepository(Quests).find( {select: ['id', 'questionTitle']} );
+  //   for (const question of questions) {
+  //     this.smoothSearch.push(this.configService.get('DOMAIN'),'leetcode',JSON.stringify(question), question.questionTitle);
+  //   }
+  // }
+
+  // async indexEntityColumn(entityId: number, columnName: string, columnValue: string): Promise<string> {
+  //   const bucket = 'your_bucket'; // Define your Sonic bucket
+  //   const collection = 'your_collection'; // Define your Sonic collection
+  //   try {
+  //     // Sanitize the text. Sonic best practices.
+  //     const sanitizedText = columnValue.replace(/[^a-zA-Z0-9\s]/g, '');
+
+  //     // Ingest the data into Sonic.
+  //     await this.sonicChannel.ingest(bucket, collection, entityId.toString(), columnName, {
+  //       lang: 'en', // Specify language if needed
+  //     });
+
+  //     return entityId.toString(); // Return the entity ID (used as object ID in sonic)
+  //   } catch (error) {
+  //     console.error('Error indexing entity column in Sonic:', error);
+  //     throw error; // Rethrow the error for handling elsewhere
+  //   }
+  // }
+
 }

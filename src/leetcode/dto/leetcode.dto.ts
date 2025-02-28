@@ -27,3 +27,9 @@ export class SolvedQuestsDTO {
   questionTitle: string;
   questionContent: string;
 }
+
+export class SearchQuestDTO {
+  // questionId, itle_slug, code_lang, llm_res
+  questionId:string;
+  questionTitle: string;
+}

@@ -13,7 +13,7 @@ import * as mime from 'mime-types';
 
 @Controller('file')
 export class FileController {
-  constructor(private readonly fileService: FileService, private readonly sonicService: SonicService) {}
+  constructor(private readonly fileService: FileService, private readonly search: SonicService) {}
 
   @Post('upload')
   @ApiOperation({ summary: 'File Upload' })

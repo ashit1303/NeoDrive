@@ -29,23 +29,41 @@ export class SonicService {
   });
   
 
-  async search(collection: string,bucket : string, query: string): Promise<string[]> {
+  async search(bucket : string, collection: string, query: string): Promise<string[]> {
     return new Promise((resolve, reject) => {
       // this.sonicSearchClient.query(collection,bucket, query, { limit: 10 , offset: 0, lang: 'en' })
-      this.sonicSearch.query(collection,bucket, query, { limit: 10 , offset: 0 })
+        this.sonicSearch.query(collection,bucket, query, { limit: 10, offset: 0 })
         .then((results) => resolve(results))
         .catch((err) => reject(err));
     });
   }
-  async push(collection: string,bucket : string, object:string, text: string): Promise<string[]> {
+  async push(bucket : string, collection: string, object:string, text: string): Promise<string[]> {
     return new Promise((resolve, reject) => {
       // this.sonicIngest.push(collection,bucket,text, {lang: 'en'})
-      this.sonicIngest.push(collection,bucket, object, text, {lang: 'en'})
+      this.sonicIngest.push(collection,bucket, object, text)
         .then(() => resolve([]))
         .catch((err) => reject(err));
     });
   }
-  async remove(collection: string,bucket : string, object:string, text: string): Promise<string[]> {
+
+  async suggest(bucket : string, collection: string, query: string): Promise<string[]> {
+    return new Promise((resolve, reject) => {
+      this.sonicSearch.suggest(collection,bucket, query, { limit: 10  })
+        .then((results) => resolve(results))
+        .catch((err) => reject(err));
+    });
+  }
+  
+  async ping(): Promise<Boolean>{
+    return new Promise((resolve, reject) => {
+      this.sonicSearch.ping()
+        .then(() => resolve(true))
+        .catch((err) => reject(err));
+    });
+  }
+  
+  
+  async remove(bucket : string, collection: string, object:string, text: string): Promise<string[]> {
     return new Promise((resolve, reject) => {
       // this.sonicIngest.push(collection,bucket,text, {lang: 'en'})
       this.sonicIngest.pop(collection,bucket, object, text,)
@@ -54,6 +72,16 @@ export class SonicService {
     });
   }
 
+  // async delete(collection: string,bucket : string, object:string, text: string): Promise<string[]> {
+  //   return new Promise((resolve, reject) => {
+  //     // this.sonicIngest.push(collection,bucket,text, {lang: 'en'})
+  //     this.sonicIngest.(collection,bucket, object, text,)
+  //       .then((num) => resolve([]))
+  //       .catch((err) => reject(err));
+  //   });
+  // }
+
+  // await this.sonicChannel.delete(bucket, collection, entityId.toString());
   async flushCollection(collection: string,): Promise<string[]> {
     return new Promise((resolve, reject) => {
       // this.sonicIngest.push(collection,bucket,text, {lang: 'en'})

@@ -16,6 +16,11 @@ export class HelperAndFormatter {
     }
     return{shortCode: parts.join('-')}
   }
+  public static sanitizeName(name: string): string {
+    const sanitizedName = name.replace(/[^a-zA-Z0-9\s]/g, '');
+    return sanitizedName;
+  }  
+  
   public static cleanHTML(html: String) : string {
     // 1. Decode HTML entities
     try{

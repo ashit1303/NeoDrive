@@ -6,6 +6,9 @@ import { ApiBody, ApiOperation, ApiProperty, ApiQuery, ApiResponse, ApiTags } fr
 import { StandardErrorResponse } from 'src/core/http-exception.filter';
 import { RedisService } from 'src/core/redis/redis.service';
 import { CodeLangDTO, SolvedQuestsDTO } from './dto/leetcode.dto';
+import { SonicService } from 'src/core/sonic/sonic.service';
+import { ConfigService } from '@nestjs/config';
+import { BaseResponse } from 'src/core/response.interceptor';
 
 @ApiTags('LeetCode')
 @Controller('leetcode')
@@ -13,6 +16,8 @@ export class LeetCodeController {
   constructor(
     private readonly leetCodeService: LeetCodeService,
     private readonly cache: RedisService,
+    private readonly config:ConfigService,
+    private readonly search: SonicService,
   ) { }
 
   // @Post('generate')
@@ -52,5 +57,18 @@ export class LeetCodeController {
     return explain;
   }
 
-  // @Get('search')
+  @Get('search')
+  @ApiQuery({ name: 'searchKey', required: true, type: String, description: 'Leetcode Problem', example: 'subarray' })
+  @ApiResponse({ status: 201, description: 'Success', type: BaseResponse })
+  @ApiResponse({ status: 400, description: 'Bad Request. Validation failed', type: StandardErrorResponse })
+  @ApiProperty({ description: 'Search Leetcode Problems' })
+  @ApiOperation({ summary: 'Search Leetcode Problems' })
+  async searchLeetCodeQuests(@Query('searchKey') searchKey:string) {
+    await this.search.ping();
+    // const value = await this.search.suggest(this.config.get('DOMAIN'), 'leetcode', searchKey);
+    const result = await this.search.search(this.config.get('DOMAIN'), 'leetcode', searchKey);
+
+    const resStmts = await this.leetCodeService.getQuestByIds(result);
+    return resStmts;
+  }
 }
