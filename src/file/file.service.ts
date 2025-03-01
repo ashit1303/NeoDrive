@@ -80,7 +80,7 @@ export class FileService {
   
   
   async searchFile(query: string) {
-    let resp = await this.sonicService.search('files', 'default', query);
+    let resp = await this.sonicService.search('files', query);
     return { success:true, message: 'File uploaded successfully', data: resp };
   }
   async fetchFile(shortValue: string) {
