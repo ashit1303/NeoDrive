@@ -39,6 +39,14 @@ services:
       - ZINC_DATA_PATH=/data # Important: Set this path inside the container
     restart: always
 
+  typesense:
+    image: typesense/typesense:28.0
+    restart: on-failure
+    ports:
+      - "8108:8108"
+    volumes:
+      - ./typesense-data:/data
+    command: '--data-dir /data --api-key=xyz --enable-cors'
   nginx:
     image: nginx:latest  # Or a specific version
     container_name: nginx

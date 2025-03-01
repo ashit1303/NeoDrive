@@ -1,14 +1,17 @@
 
-import { Controller, Post, Body, Get, Query, HttpCode } from '@nestjs/common';
+import { Controller, Get, Query, } from '@nestjs/common';
 import { LeetCodeService } from './leetcode.service';
 import { ApiBody, ApiOperation, ApiProperty, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 // import { UrlDTO,  } from './dto/leetcode.dto';
 import { StandardErrorResponse } from 'src/core/http-exception.filter';
 import { RedisService } from 'src/core/redis/redis.service';
-import { CodeLangDTO, SolvedQuestsDTO } from './dto/leetcode.dto';
+import { CodeLangDTO, LeetSearchResponse, SolvedQuestsDTO } from './dto/leetcode.dto';
 import { SonicService } from 'src/core/sonic/sonic.service';
 import { ConfigService } from '@nestjs/config';
 import { BaseResponse } from 'src/core/response.interceptor';
+import { TypesenseService } from 'src/core/typesense/typesense.service';
+import { Constants } from 'src/core/constants';
+import * as Typesense from 'typesense';
 
 @ApiTags('LeetCode')
 @Controller('leetcode')
@@ -17,6 +20,7 @@ export class LeetCodeController {
     private readonly leetCodeService: LeetCodeService,
     private readonly cache: RedisService,
     private readonly config:ConfigService,
+    private readonly typesense:TypesenseService,
     private readonly search: SonicService,
   ) { }
 
@@ -59,16 +63,34 @@ export class LeetCodeController {
 
   @Get('search')
   @ApiQuery({ name: 'searchKey', required: true, type: String, description: 'Leetcode Problem', example: 'subarray' })
-  @ApiResponse({ status: 201, description: 'Success', type: BaseResponse })
+  @ApiResponse({ status: 201, description: 'Success', type: LeetSearchResponse })
   @ApiResponse({ status: 400, description: 'Bad Request. Validation failed', type: StandardErrorResponse })
   @ApiProperty({ description: 'Search Leetcode Problems' })
   @ApiOperation({ summary: 'Search Leetcode Problems' })
   async searchLeetCodeQuests(@Query('searchKey') searchKey:string) {
     await this.search.ping();
-    // const value = await this.search.suggest(this.config.get('DOMAIN'), 'leetcode', searchKey);
-    const result = await this.search.search(this.config.get('DOMAIN'), 'leetcode', searchKey);
+    const value = await this.search.suggest( 'leetcode', searchKey);
+    const result = await this.search.search('leetcode', searchKey);
 
     const resStmts = await this.leetCodeService.getQuestByIds(result);
     return resStmts;
+  }
+
+  @Get('search-by-typesense')
+  @ApiQuery({ name: 'searchKey', required: true, type: String, description: 'Leetcode Problem', example: 'subarray' })
+  @ApiResponse({ status: 201, description: 'Success', type: LeetSearchResponse })
+  @ApiResponse({ status: 400, description: 'Bad Request. Validation failed', type: StandardErrorResponse })
+  @ApiProperty({ description: 'Search Leetcode Problems' })
+  @ApiOperation({ summary: 'Search Leetcode Problems' })
+  async searchLeetCodeQuestsTypesense(@Query('searchKey') searchKey:string) {
+    await this.search.ping();
+    // const value = await this.typesense.s( Constants.LeetCollection, searchKey);
+    const result = await this.typesense.search(Constants.LeetCollection, {q: searchKey,query_by: 'questionTitle',});
+    // console.log(result)
+    const resp = result.hits.map((hit: Typesense.SearchClient['apiCall']['hits'][0]) => {
+      return hit.document
+    })
+    // const resStmts = await this.leetCodeService.getQuestByIds(result);
+    return resp;
   }
 }
