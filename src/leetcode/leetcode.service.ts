@@ -18,7 +18,7 @@ export class LeetCodeService {
     private typeorm: TypeormService,
     private readonly configService: ConfigService,
     private readonly ollama: OllamaService,
-    private readonly smoothSearch: SonicService ,
+    private readonly smoothSearch: SonicService,
     private readonly logger: ZincLogger,
   ) { }
   getSlugFromUrl(url: string): string {
@@ -30,15 +30,13 @@ export class LeetCodeService {
       this.logger.log('No slugs to insert', slugsList);
       return; // Handle empty input gracefully
     }
-
-    let relatedQuests = [];
-    slugsList.forEach((element: any) => {
-      relatedQuests.push(element.titleSlug);
-    });
-
     try {
-      for (const slug of relatedQuests) {
-        this.typeorm.getRepository(Quests).query(`INSERT IGNORE INTO quests (title_slug) VALUES ('${slug}');`);
+      let relatedQuests = [];
+      slugsList.forEach((element: any) => {
+        relatedQuests.push(element.titleSlug);
+      });
+      for await(const slug of relatedQuests) {
+        await this.typeorm.getRepository(Quests).query(`INSERT IGNORE INTO quests (title_slug) VALUES ('${slug}');`);
       }
       // const valuesToInsert = relatedQuests.map((slug) => ({ titleSlug: slug })); // Prepare data for insert
 
@@ -76,30 +74,30 @@ export class LeetCodeService {
 
     const cleanedContent = Helper.cleanHTML(data.content);
     await this.typeorm.getRepository(Quests)
-    .createQueryBuilder()
-    .insert()
-    .into(Quests)
-    .values({
-      questionId: data.questionId || null,
-      titleSlug: data.titleSlug,
-      difficulty: data.difficulty.toLowerCase() || null,
-      questionTitle: data.questionTitle || null,
-      content: data.content || null,
-      cleanedContent: cleanedContent || null,
-      categoryTitle: data.categoryTitle || null,
-    })
-    .orUpdate(
-      ["question_id", "difficulty", "question_title", "content", "cleaned_content", "category_title"],
-      ["titleSlug"]
-    )
-    // .setParameter('questionId', data.questionId || null)
-    // .setParameter('difficulty', data.difficulty.toLowerCase() || null)
-    // .setParameter('questionTitle', data.questionTitle || null)
-    // .setParameter('content', data.content || null)
-    // .setParameter('cleanedContent', cleanedContent || null)
-    // .setParameter('categoryTitle', data.categoryTitle || null)
-    // .returning('*')
-    .execute();
+      .createQueryBuilder()
+      .insert()
+      .into(Quests)
+      .values({
+        questionId: data.questionId || null,
+        titleSlug: data.titleSlug,
+        difficulty: data.difficulty.toLowerCase() || null,
+        questionTitle: data.questionTitle || null,
+        content: data.content || null,
+        cleanedContent: cleanedContent || null,
+        categoryTitle: data.categoryTitle || null,
+      })
+      .orUpdate(
+        ["question_id", "difficulty", "question_title", "content", "cleaned_content", "category_title"],
+        ["titleSlug"]
+      )
+      // .setParameter('questionId', data.questionId || null)
+      // .setParameter('difficulty', data.difficulty.toLowerCase() || null)
+      // .setParameter('questionTitle', data.questionTitle || null)
+      // .setParameter('content', data.content || null)
+      // .setParameter('cleanedContent', cleanedContent || null)
+      // .setParameter('categoryTitle', data.categoryTitle || null)
+      // .returning('*')
+      .execute();
 
   }
 
@@ -110,8 +108,8 @@ export class LeetCodeService {
     return await this.typeorm.getRepository(Quests).findOne({ where: { titleSlug: slug } });
 
   }
-  async getQuestAnsFromDB(slug: string, codeLang:SolvedQuestsDTO['codeLang']): Promise<SolvedQuestsDTO> {
-    const [quesiton ] = await this.typeorm.query(`SELECT qu.question_id as questionId, qu.title_slug as titleSlug,qu.content, code_lang as codeLang, llm_res as llmRes, qu.difficulty, qu.question_id, qu.content, qu.question_title as questionTitle FROM quests_answer qa right join quests qu on qa.question_id = qu.question_id WHERE qu.title_slug = '${slug}' and qa.code_lang = '${codeLang}'  LIMIT 1`);
+  async getQuestAnsFromDB(slug: string, codeLang: SolvedQuestsDTO['codeLang']): Promise<SolvedQuestsDTO> {
+    const [quesiton] = await this.typeorm.query(`SELECT qu.question_id as questionId, qu.title_slug as titleSlug,qu.content, code_lang as codeLang, llm_res as llmRes, qu.difficulty, qu.question_id, qu.content, qu.question_title as questionTitle FROM quests_answer qa right join quests qu on qa.question_id = qu.question_id WHERE qu.title_slug = '${slug}' and qa.code_lang = '${codeLang}'  LIMIT 1`);
     return quesiton
   }
   // https://leetcode.com/problems/longest-substring-without-repeating-characters/
@@ -167,7 +165,7 @@ export class LeetCodeService {
           'x-csrftoken': 'Yuj3H94eV7MNl7hAI1OeXAisL1CSkyvmuNauiTyJwJXQNGcvistoup1NwaNZxGZv'
         }
       });
-      
+
       const problemDetails = response.data.data.question;
       console.log('problemDetails', JSON.stringify(problemDetails))
       await this.storeQuestion(problemDetails)
@@ -179,8 +177,8 @@ export class LeetCodeService {
 
   async getExplanation(codeLang: string, questionDescription: string, questionId: string) {
     let explainPromt = `Give only optimed code, explanation, time and space complexity in ${codeLang}`
-    const llmRes = await this.ollama.generateResponse(explainPromt + ' ' + questionDescription );
-    this.storeQuestsAnswer(llmRes,  codeLang, questionId);
+    const llmRes = await this.ollama.generateResponse(explainPromt + ' ' + questionDescription);
+    this.storeQuestsAnswer(llmRes, codeLang, questionId);
     return llmRes;
   }
 
@@ -189,7 +187,7 @@ export class LeetCodeService {
       let dbQuestion = await this.fetchQuestionDetailsFromLeetCode(slug);
       let questionId = dbQuestion.questionId
 
-      dbQuestion = `Problem Title: ${dbQuestion.questionTitle}\n Problem Statement:\n${dbQuestion.cleanedContent||dbQuestion.content}`;
+      dbQuestion = `Problem Title: ${dbQuestion.questionTitle}\n Problem Statement:\n${dbQuestion.cleanedContent || dbQuestion.content}`;
       dbQuestion = JSON.stringify(dbQuestion);
       const explain = await this.getExplanation(codeLang, dbQuestion, questionId);
       return;
@@ -200,11 +198,11 @@ export class LeetCodeService {
   }
 
   async getUnsolvedQuests() {
-    return this.typeorm.getRepository(Quests).find({ where: { questionId: IsNull() } , take: 1 });
+    return this.typeorm.getRepository(Quests).find({ where: { questionId: IsNull() }, take: 1 });
   }
 
   async getQuestByIds(ids: string[]): Promise<Quests[]> {
-    return this.typeorm.getRepository(Quests).find({ select: ['id','questionTitle'], where: { id: In(ids) } });
+    return this.typeorm.getRepository(Quests).find({ select: ['id', 'questionTitle'], where: { id: In(ids) } });
   }
   // async updateSonicSearchForQuestions(){
   //   const questions = await this.typeorm.getRepository(Quests).find( {select: ['id', 'questionTitle']} );

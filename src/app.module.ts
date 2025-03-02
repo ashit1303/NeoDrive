@@ -22,6 +22,8 @@ import { LoggerMiddleware } from './core/logger/logger.middleware';
 import { ZincLogger } from './core/logger/zinc.service';
 import { LeetCodeModule } from './leetcode/leetcode.module';
 import { CronModule } from './core/cron/cron.module';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { TypesenseModule } from './core/typesense/typesense.module';
 // import { ResponseModifierMiddleware } from './core/response.interceptor';
 log('process.env.NODE_ENV', process.env.NODE_ENV);
@@ -32,6 +34,12 @@ log('process.env.NODE_ENV', process.env.NODE_ENV);
     cache: false,  // Caches the .env file
     // ignoreEnvFile: true,  // Ignores the .env file
     // envFilePath: null,
+  }),
+  GraphQLModule.forRoot<ApolloDriverConfig>({
+    driver: ApolloDriver,
+    autoSchemaFile: 'schema.gql',
+    sortSchema: true,
+    playground: true,
   }),
     TypeormModule, AuthModule, MailerModule, FileModule, UserModule, SonicModule, ShortenerModule, LeetCodeModule, CronModule,TypesenseModule
   ],

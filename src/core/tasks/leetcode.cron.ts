@@ -24,7 +24,7 @@ export class LeetCodeCron {
 
   ) { }
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_MINUTE)
   async solveAndUpdateQuests() {
     try {
       const slugList = await this.leetService.getUnsolvedQuests();

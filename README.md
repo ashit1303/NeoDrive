@@ -3,28 +3,6 @@
 
 [NeoDrive](https://github.com/ashit1303/NeoDrive) A project to learn a typescript application and making it scalable using open source projects.
 
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit [ZincSearch](https://zincsearch-docs.zinc.dev/)
-- Visit [Nginx](https://nginx.org/en/docs/) 
-- Visit [NOIP-DUC](https://my.noip.com/)  
-- Visit [Ollama](https://ollama.com/) 
-- Visit [MariaDB](https://mariadb.org/documentation/) 
-- Visit [Redis](https://redis.io/docs/latest/) 
-- Visit [Vector](https://vector.dev/) 
-- Visit [VictoriaMetrics](https://github.com/VictoriaMetrics/) 
-- Visit [SonicSearch](https://github.com/valeriansaliou/sonic) 
-- Visit [Liftbridge](https://github.com/LiftbridgeIO/liftbridge)
-- Visit [MongoDB](https://www.mongodb.com/) 
-- Visit [GraphQl](https://graphql.org/)
-- [MongoDB](Under development) 
-- [GraphQl](Under development) 
-- [Mailer](Under development)
-- [Neo4j](Under development)
-- [OLAP-DuckDB](Under development)
-- Author - [Ash](https://github.com/ashit1303)
 
 # RoadMap 
 
@@ -37,7 +15,6 @@ Check out a few resources that may come in handy when working with NestJS:
 - reduce memory consumption
 - graphql
 - understanding graphDb
-
 - jest pactun for testing e2e writing test case 
 - circle ci
 - github actions
@@ -45,10 +22,13 @@ Check out a few resources that may come in handy when working with NestJS:
 - Docker podman for containerize dependency 
 - 
 
+## yarn > install pkgs > gen-config > boot > initiatesql > start-project
+
 ## Docker prerequisites
 
 ```bash
 $ podman compose up -d
+```
 
 ## Install core package
 
@@ -102,8 +82,30 @@ $ yarn run start:dev
 # production mode
 $ yarn run start:prod
 ```
+## Resources
 
-# yarn > install pkgs > gen-config > boot > initiatesql > start-project
+Check out a few resources that may come in handy when working with NestJS:
+
+- [ZincSearch](https://zincsearch-docs.zinc.dev/)
+- [Nginx](https://nginx.org/en/docs/) 
+- [NOIP-DUC](https://my.noip.com/)  
+- [Ollama](https://ollama.com/) 
+- [MariaDB](https://mariadb.org/documentation/) 
+- [Redis](https://redis.io/docs/latest/) 
+- [Vector](https://vector.dev/) 
+- [VictoriaMetrics](https://github.com/VictoriaMetrics/) 
+- [SonicSearch](https://github.com/valeriansaliou/sonic) 
+- [Liftbridge](https://github.com/LiftbridgeIO/liftbridge)
+- [MongoDB](https://www.mongodb.com/) 
+- [GraphQl](https://graphql.org/)
+- [MongoDB](Under development) 
+- [GraphQl](Under development) 
+- [Mailer](Under development)
+- [Neo4j](Under development)
+- [OLAP-DuckDB](Under development)
+- Author - [Ash](https://github.com/ashit1303)
+
+
 
 ## License
 

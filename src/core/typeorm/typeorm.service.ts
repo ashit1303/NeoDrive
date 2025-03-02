@@ -14,6 +14,11 @@ export class TypeormService extends DataSource implements OnApplicationBootstrap
         username: 'admin',
         password: 'password',
         database: 'neodrive',
+        extra: {
+            // Maximum number of connections in the pool
+            connectionLimit: 10,
+            queueLimit: 0,
+        },
         entities: [
             // __dirname + '/../**/*.entity{.ts,.js}',
             // __dirname + '/../**/*/.model{.ts,.js}',
@@ -22,6 +27,7 @@ export class TypeormService extends DataSource implements OnApplicationBootstrap
         // entities: [], 
         synchronize: true,
         });
+        
         console.log(
             // __dirname + '/../**/*.entity{.ts,.js}',
             // __dirname + '/../**/*/.model{.ts,.js}',
