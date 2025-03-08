@@ -15,7 +15,7 @@ import { SonicService } from "src/core/sonic/sonic.service";
 @Injectable()
 export class LeetCodeService {
   constructor(
-    private typeorm: TypeormService,
+    private readonly typeorm: TypeormService,
     private readonly configService: ConfigService,
     private readonly ollama: OllamaService,
     private readonly smoothSearch: SonicService,
@@ -203,6 +203,45 @@ export class LeetCodeService {
 
   async getQuestByIds(ids: string[]): Promise<Quests[]> {
     return this.typeorm.getRepository(Quests).find({ select: ['id', 'questionTitle'], where: { id: In(ids) } });
+  }
+
+
+  async fetchQuestionLists(skip: string) {
+    const url = "https://leetcode.com/graphql";
+    const query = {
+      "query":" query problemsetPanelQuestionList($filters: QuestionFilterInput, $searchKeyword: String, $sortBy: QuestionSortByInput, $categorySlug: String, $limit: Int, $skip: Int) { problemsetPanelQuestionList( filters: $filters searchKeyword: $searchKeyword sortBy: $sortBy categorySlug: $categorySlug limit: $limit skip: $skip ) { questions { id titleSlug title translatedTitle questionFrontendId paidOnly difficulty topicTags { name slug nameTranslated } status isInMyFavorites frequency acRate } totalLength finishedLength panelName hasMore }} ","variables":{"skip":skip,"limit":100,"categorySlug":"","filters":{"filterCombineType":"ALL","statusFilter":{"questionStatuses":[],"operator":"IS"},"difficultyFilter":{"difficulties":[],"operator":"IS"},"languageFilter":{"languageSlugs":[],"operator":"IS"},"topicFilter":{"topicSlugs":[],"operator":"IS"},"acceptanceFilter":{},"frequencyFilter":{},"lastSubmittedFilter":{},"publishedFilter":{},"companyFilter":{"companySlugs":[],"operator":"IS"},"positionFilter":{"positionSlugs":[],"operator":"IS"},"premiumFilter":{"premiumStatus":[],"operator":"IS"}},"searchKeyword":"","sortBy":{"sortField":"CUSTOM","sortOrder":"ASCENDING"},"options":{"enabled":true},"filtersV2":{"filterCombineType":"ALL","statusFilter":{"questionStatuses":[],"operator":"IS"},"difficultyFilter":{"difficulties":[],"operator":"IS"},"languageFilter":{"languageSlugs":[],"operator":"IS"},"topicFilter":{"topicSlugs":[],"operator":"IS"},"acceptanceFilter":{},"frequencyFilter":{},"lastSubmittedFilter":{},"publishedFilter":{},"companyFilter":{"companySlugs":[],"operator":"IS"},"positionFilter":{"positionSlugs":[],"operator":"IS"},"premiumFilter":{"premiumStatus":[],"operator":"IS"}}},"operationName":"problemsetPanelQuestionList"
+    };
+
+    try {
+      const response = await axios.post(url, query, {
+        headers: {
+          'accept': '*/*',
+          'accept-language': 'en-US,en;q=0.9',
+          'content-type': 'application/json',
+          'cookie': this.configService.get('LEET_COOKIE'),
+          'origin': 'https://leetcode.com',
+          'priority': 'u=1, i',
+          'random-uuid': '00b3b94a-d622-baec-d6fa-77dbd29d94d3',
+          'referer': 'https://leetcode.com/problems/${slug}/description/',
+          'sec-ch-ua': '"Google Chrome";v="129", "Not=A?Brand";v="8", "Chromium";v="129"',
+          'sec-ch-ua-mobile': '?0',
+          'sec-ch-ua-platform': '"Linux"',
+          'sec-fetch-dest': 'empty',
+          'sec-fetch-mode': 'cors',
+          'sec-fetch-site': 'same-origin',
+          'sentry-trace': 'aadd23de586549d0b62e02c85c318cd5-b5d86e9245155ec0-0',
+          'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
+          'x-csrftoken': 'Yuj3H94eV7MNl7hAI1OeXAisL1CSkyvmuNauiTyJwJXQNGcvistoup1NwaNZxGZv'
+        }
+      });
+
+      const problemDetails = response.data.data.question;
+      console.log('problemDetails', JSON.stringify(problemDetails))
+      await this.storeQuestion(problemDetails)
+      return problemDetails;
+    } catch (error) {
+      this.logger.error("Error fetching problem:", error.message);
+    }
   }
   // async updateSonicSearchForQuestions(){
   //   const questions = await this.typeorm.getRepository(Quests).find( {select: ['id', 'questionTitle']} );

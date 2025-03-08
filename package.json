@@ -7,7 +7,8 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "create-model": "npx prisma db pull && npx prisma generate && npx typeorm-model-generator -d neodrive -u admin -x password -e mariadb -o src/core/models --noConfig --propertyVisibility public",
+    "prisma-model":"npx prisma db pull && npx prisma generate &&",
+    "create-model": " npx typeorm-model-generator -d neodrive -u admin -x password -e mariadb -o src/core/models --noConfig --propertyVisibility public",
     "create-db": "npx prisma db push",
     "prep-config": "./scripts/prep-config.sh",
     "prep-termux": "chmod +x prep-termux ./prep-termux.sh",
@@ -25,6 +26,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@apollo/server": "^4.11.3",
     "@nestjs-modules/ioredis": "^2.0.2",
     "@nestjs/apollo": "^13.0.3",
     "@nestjs/common": "^10.0.0",

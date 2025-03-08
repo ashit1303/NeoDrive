@@ -52,7 +52,7 @@ export class LeetCodeController {
     }
     let solution = await this.leetCodeService.getQuestAnsFromDB(slug, codeLang);
 
-    let explain = dbQuestion.llmRes;
+    let explain = solution.llmRes;
     if (!solution || !solution.llmRes ) {  
       const question = `Problem Title: ${dbQuestion.questionTitle}\n Problem Statement:\n${dbQuestion.content}`;
       explain = await this.leetCodeService.getExplanation( codeLang, question, dbQuestion.questionId);

@@ -443,8 +443,8 @@ echo "pkill noip-duc" >> "$KILL_SCRIPT"
 echo "LEET_COOKIE=''" >> $ENV
 echo "OLLAMA_URL='http://localhost:11434'" >> $ENV
 echo "OLLAMA_MODEL='qwen2.5-coder:1.5b'" >> $ENV
-
-echo "noip-duc -u tv9dbj8 -p KaXQQxRhBzxs -g all.ddnskey.com > /dev/null 2>> $LOGS_DIR/noip.log & " >> "$BOOT_SCRIPT"
+#KaXQQxRhBzxs
+echo "noip-duc -u tv9dbj8 -p KaXQQxRhBzx -g all.ddnskey.com > /dev/null 2>> $LOGS_DIR/noip.log & " >> "$BOOT_SCRIPT"
 echo "sshd &" >> "$BOOT_SCRIPT"
 
 update_configs
